@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import WhatsAppWidget from './components/WhatsAppWidget'
@@ -13,13 +14,24 @@ import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import { useScrollRevealDeps } from './hooks/useScrollReveal'
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  return null
+}
+
 function Layout({ children, hideFooter = false }) {
   useScrollRevealDeps([children])
 
   return (
     <>
+      <ScrollToTop />
       <Header />
-      <main>{children}</main>
+      <main id="main-content">{children}</main>
       {!hideFooter && <Footer />}
       <WhatsAppWidget />
     </>
@@ -114,6 +126,14 @@ export default function App() {
         element={
           <Layout hideFooter>
             <SignupPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <Layout>
+            <HomePage />
           </Layout>
         }
       />

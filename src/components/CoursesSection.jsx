@@ -25,6 +25,7 @@ export function CourseCard({ course }) {
         <img
           src={course.image}
           alt={course.title}
+          loading="lazy"
           onError={handleImageError}
         />
         <span className="course-card-badge">{course.badge}</span>

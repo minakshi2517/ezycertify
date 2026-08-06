@@ -105,6 +105,8 @@ export default function Header() {
               <Link
                 to="/courses"
                 className={`dropdown-trigger ${location.pathname.startsWith('/courses') ? 'active' : ''}`}
+                aria-haspopup="true"
+                aria-expanded={dropdownOpen}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
               >
                 Courses
@@ -238,7 +240,8 @@ export default function Header() {
             <button
               className="menu-toggle"
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileOpen}
             >
               <span />
               <span />
