@@ -55,30 +55,9 @@ export default function AboutPage() {
       iconSvg: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
+          <polyline points="12 6 12 16 14" />
         </svg>
       ),
-    },
-  ]
-
-  const leadership = [
-    {
-      name: 'Dr. Rajesh Vardhan',
-      role: 'Founder & Academic Director (PMP®, PfMP®, SPC 6.0)',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&auto=format&fit=crop',
-      bio: '20+ years guiding global enterprise Agile transformations and mentoring over 2,000 PMP aspirants to first-try exam success.',
-    },
-    {
-      name: 'Ananya Deshmukh',
-      role: 'Head of Agile & Scrum Practices (CST®, A-CSM®)',
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80&auto=format&fit=crop',
-      bio: 'Certified Scrum Trainer with Scrum Alliance specializing in product backlog refinement and SAFe enterprise portfolio management.',
-    },
-    {
-      name: 'Vikram Malhotra',
-      role: 'Director of Candidate Success & Application Support',
-      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80&auto=format&fit=crop',
-      bio: 'Oversees 1-on-1 candidate application reviews and PMI audit compliance, maintaining Ezycertify’s 100% approval track record.',
     },
   ]
 
@@ -231,7 +210,7 @@ export default function AboutPage() {
         </div>
 
         {/* 4 Pillars of Excellence */}
-        <div style={{ marginBottom: '4.5rem' }}>
+        <div>
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
             <span className="section-label">WHY EZYCERTIFY STANDS APART</span>
             <h2 className="section-title">Built Upon Four Pillars of Excellence</h2>
@@ -256,41 +235,6 @@ export default function AboutPage() {
                 <p style={{ fontSize: '0.9rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>
                   {p.desc}
                 </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Leadership & Academic Board */}
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <span className="section-label">ACADEMIC LEADERSHIP</span>
-            <h2 className="section-title">Guided by Industry Thought Leaders</h2>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-            {leadership.map((l, i) => (
-              <div key={i} style={{
-                background: 'var(--white)',
-                borderRadius: 'var(--radius)',
-                overflow: 'hidden',
-                border: '1px solid var(--gray-200)',
-                boxShadow: 'var(--shadow-sm)'
-              }}>
-                <img
-                  src={l.image}
-                  alt={l.name}
-                  style={{ width: '100%', height: '240px', objectFit: 'cover' }}
-                />
-                <div style={{ padding: '1.75rem' }}>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--navy)' }}>{l.name}</h3>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--blue)', display: 'block', margin: '0.3rem 0 0.85rem' }}>
-                    {l.role}
-                  </span>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>
-                    {l.bio}
-                  </p>
-                </div>
               </div>
             ))}
           </div>
