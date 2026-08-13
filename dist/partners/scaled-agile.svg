@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 48" role="img" aria-label="Scaled Agile">
+  <polygon points="8,36 24,8 40,36" fill="#EE3124"/>
+  <polygon points="18,36 24,22 30,36" fill="#fff"/>
+  <text x="50" y="22" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="800" fill="#333">SCALED</text>
+  <text x="50" y="36" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="800" fill="#EE3124">AGILE</text>
+</svg>

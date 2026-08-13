@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import WhatsAppWidget from './components/WhatsAppWidget'
+import CallbackBar from './components/CallbackBar'
 import HomePage from './pages/HomePage'
 import CoursesPage from './pages/CoursesPage'
 import CourseDetailPage from './pages/CourseDetailPage'
@@ -12,6 +13,8 @@ import ContactPage from './pages/ContactPage'
 import VerifyCertPage from './pages/VerifyCertPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import EnterprisePage from './pages/EnterprisePage'
+import FreePracticeTestPage from './pages/FreePracticeTestPage'
 import { useScrollRevealDeps } from './hooks/useScrollReveal'
 
 function ScrollToTop() {
@@ -34,6 +37,7 @@ function Layout({ children, hideFooter = false }) {
       <main id="main-content">{children}</main>
       {!hideFooter && <Footer />}
       <WhatsAppWidget />
+      <CallbackBar />
     </>
   )
 }
@@ -62,6 +66,22 @@ export default function App() {
         element={
           <Layout>
             <CourseDetailPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/enterprise"
+        element={
+          <Layout>
+            <EnterprisePage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/free-practice-test"
+        element={
+          <Layout>
+            <FreePracticeTestPage />
           </Layout>
         }
       />

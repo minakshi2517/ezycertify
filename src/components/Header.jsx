@@ -188,6 +188,12 @@ export default function Header() {
               )}
             </div>
 
+            <Link to="/enterprise" className={location.pathname === '/enterprise' ? 'active' : ''}>
+              Enterprise
+            </Link>
+            <Link to="/free-practice-test" className={location.pathname === '/free-practice-test' ? 'active' : ''}>
+              Free Mock Test
+            </Link>
             <Link to="/career" className={location.pathname === '/career' ? 'active' : ''}>
               Career
             </Link>
