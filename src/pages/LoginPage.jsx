@@ -29,17 +29,58 @@ export default function LoginPage() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: 'calc(var(--header-h) + 2rem) 1rem 3rem',
-      background: 'var(--gray-50)'
+      background: 'var(--gray-50)',
+      position: 'relative'
     }}>
       <div style={{
         background: 'var(--white)',
         borderRadius: 'var(--radius-lg)',
-        padding: '3rem 2.5rem',
+        padding: '3rem 2.5rem 2.5rem',
         maxWidth: '460px',
         width: '100%',
         boxShadow: 'var(--shadow-md)',
-        border: '1px solid var(--gray-200)'
+        border: '1px solid var(--gray-200)',
+        position: 'relative'
       }}>
+        {/* Top Right Close Cross Button */}
+        <button
+          onClick={() => navigate('/')}
+          aria-label="Close and return to home"
+          title="Return to Home"
+          style={{
+            position: 'absolute',
+            top: '1.25rem',
+            right: '1.25rem',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            border: '1px solid #e2e8f0',
+            background: '#f8fafc',
+            color: '#64748b',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            outline: 'none',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#fee2e2'
+            e.currentTarget.style.color = '#ef4444'
+            e.currentTarget.style.borderColor = '#fca5a5'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#f8fafc'
+            e.currentTarget.style.color = '#64748b'
+            e.currentTarget.style.borderColor = '#e2e8f0'
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
         {/* Brand Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
@@ -55,7 +96,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Title & Subtitle matching reference */}
+        {/* Title & Subtitle */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#1e293b', marginBottom: '0.35rem' }}>
             Welcome back!
@@ -218,11 +259,28 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Footer Redirect Link */}
-        <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem', color: '#64748b' }}>
-          Don't have an account?{' '}
-          <Link to="/signup" style={{ color: '#0074e4', fontWeight: 700, textDecoration: 'underline' }}>
-            Sign Up
+        {/* Footer Redirect Links */}
+        <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+          <div>
+            Don't have an account?{' '}
+            <Link to="/signup" style={{ color: '#0074e4', fontWeight: 700, textDecoration: 'underline' }}>
+              Sign Up
+            </Link>
+          </div>
+
+          <Link
+            to="/"
+            style={{
+              color: 'var(--gray-600)',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              textDecoration: 'none'
+            }}
+          >
+            ← Back to Home Page
           </Link>
         </div>
       </div>
