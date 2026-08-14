@@ -68,7 +68,7 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)' }}>Global Phone & WhatsApp</h3>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)' }}>Contact Number</h3>
                   <p style={{ fontSize: '0.95rem', color: 'var(--blue)', fontWeight: 700, marginTop: '0.2rem' }}>{PHONE_NUMBER}</p>
                 </div>
               </div>
@@ -241,14 +241,14 @@ export default function ContactPage() {
             <span className="section-label">VISIT OUR ACADEMY</span>
             <h2 className="section-title" style={{ fontSize: '1.85rem' }}>Our Headquarters Location</h2>
             <p style={{ color: 'var(--gray-600)', fontSize: '0.95rem' }}>
-              Shagun Arcade, Near Vijay Nagar Square, Vijay Nagar, Indore, Madhya Pradesh 452010
+              {ADDRESS_TEXT}
             </p>
           </div>
 
           <div style={{ borderRadius: 'var(--radius)', overflow: 'hidden', height: '420px', border: '1px solid var(--gray-200)' }}>
             <iframe
               title="Ezycertify HQ Map Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3679.5244589201944!2d75.89279097589947!3d22.7458933266008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3962fd56f4d2f099%3A0xb366b5952fdf3d15!2sShagun%20Arcade%2C%20Vijay%20Nagar%2C%20Indore%2C%20Madhya%20Pradesh%20452010!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3781.700147663456!2d73.9056!3d18.5875!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c14041b65e9b%3A0xb3a82207b719cbdf!2sPorwal%20Rd%2C%20Lohegaon%2C%20Pune%2C%20Maharashtra%20411047!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0 }}

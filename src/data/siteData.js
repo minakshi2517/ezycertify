@@ -1,6 +1,6 @@
-export const WHATSAPP_NUMBER = '919769110888'
-export const PHONE_NUMBER = '+91 97691 10888'
-export const ADDRESS_TEXT = '5th Floor, 504, Shagun Arcade, near Apna Sweets, PU 4, Near Vijay Nagar Square, Vijay Nagar, Scheme No.54, Ratna Lok Colony, Indore, Madhya Pradesh 452010'
+export const WHATSAPP_NUMBER = '919685140726'
+export const PHONE_NUMBER = '+91 96851 40726'
+export const ADDRESS_TEXT = '11th floor - 1101 Aeropolis Phase 1 - Opp SBI Bank, Porwal Road Lohegaon Pune - 411047'
 export const EMAIL_ADDRESS = 'info@ezycertify.com'
 
 export const languages = [
@@ -1109,7 +1109,7 @@ export const jobListings = [
     id: 'pmp-instructor',
     title: 'PMP® Authorized Lead Instructor',
     department: 'Training & Delivery',
-    location: 'Remote / Indore HQ',
+    location: 'Remote / Pune HQ',
     type: 'Full-time / Part-time',
     experience: 'PMP® Certified, 10+ Years Corporate Experience',
     description:
@@ -1129,7 +1129,7 @@ export const jobListings = [
     id: 'learning-counselor',
     title: 'Senior Academic Counselor / Learner Advisor',
     department: 'Sales & Support',
-    location: 'Indore HQ (On-site)',
+    location: 'Pune HQ (On-site)',
     type: 'Full-time',
     experience: '2-5 Years EdTech Counseling Experience',
     description:
