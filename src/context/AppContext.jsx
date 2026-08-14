@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
 import { languages } from '../data/siteData'
 import { getTranslation, translateText } from '../data/translations'
 
@@ -20,13 +20,43 @@ export function AppProvider({ children }) {
   )
 
   const t = useMemo(() => getTranslation(language), [language])
-
   const tr = useCallback((text) => translateText(text, language), [language])
+
+  const triggerGoogleTranslate = useCallback((code) => {
+    let targetLang = code
+    if (code === 'en-US' || code === 'en-GB' || code === 'en-IN') {
+      targetLang = 'en'
+    } else if (code.includes('-') && !['zh-CN', 'zh-TW', 'pt-BR'].includes(code)) {
+      targetLang = code.split('-')[0]
+    }
+
+    const hostname = window.location.hostname
+    document.cookie = `googtrans=/en/${targetLang}; path=/; domain=${hostname}`
+    document.cookie = `googtrans=/en/${targetLang}; path=/;`
+
+    const selectElem = document.querySelector('.goog-te-combo')
+    if (selectElem) {
+      selectElem.value = targetLang
+      selectElem.dispatchEvent(new Event('change'))
+    }
+  }, [])
 
   const setLanguage = useCallback((code) => {
     setLanguageState(code)
     localStorage.setItem('ezycertify-lang', code)
-  }, [])
+    triggerGoogleTranslate(code)
+  }, [triggerGoogleTranslate])
+
+  // Sync Google Translate on mount/reload if saved language exists
+  useEffect(() => {
+    const saved = localStorage.getItem('ezycertify-lang')
+    if (saved && saved !== 'en-US') {
+      const timer = setTimeout(() => {
+        triggerGoogleTranslate(saved)
+      }, 800)
+      return () => clearTimeout(timer)
+    }
+  }, [triggerGoogleTranslate])
 
   const signIn = useCallback((email, password) => {
     const mockUser = { email, name: email.split('@')[0] }
