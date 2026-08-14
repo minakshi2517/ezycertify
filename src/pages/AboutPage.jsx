@@ -10,8 +10,8 @@ export default function AboutPage() {
   ]
 
   const accreditations = [
-    { title: 'PMI Premier ATP', desc: 'Authorized Training Partner of Project Management Institute (PMI®)' },
-    { title: 'Scrum Alliance REP', desc: 'Official Registered Education Provider for CSM® & CSPO® credentials' },
+    { title: 'PMI Accredited Partner', desc: 'Global Certification Partner of Project Management Institute (PMI®)' },
+    { title: 'Scrum Alliance Accredited', desc: 'Official Accredited Education Academy for CSM® & CSPO® credentials' },
     { title: 'SAFe® Silver Partner', desc: 'Accredited Scaled Agile partner delivering Leading SAFe® 6.0' },
     { title: 'PeopleCert Accredited', desc: 'Official exam voucher & course provider for ITIL® 4 Foundation' },
   ]

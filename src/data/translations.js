@@ -47,7 +47,7 @@ export const translations = {
   },
   'en-IN': {
     nav: { home: 'Home', courses: 'Courses', career: 'Career', about: 'About', contact: 'Contact', verify: 'Verify Cert', signIn: 'Login', signUp: 'Sign Up' },
-    hero: { badge: 'PMI PREMIER ATP & SCRUM ALLIANCE ACCREDITED ACADEMY', title: 'Advance Your Career with Globally Recognized Certifications', subtitle: 'Master PMP®, Scrum Alliance CSM®, SAFe® 6.0, and Cloud Architecture.', cta: 'Explore Courses', ctaSecondary: 'Speak to Counselor', stats: '4,500+ Certified Professionals · 99.2% Pass Rate' },
+    hero: { badge: 'GLOBALLY ACCREDITED CERTIFICATION ACADEMY', title: 'Advance Your Career with Globally Recognized Certifications', subtitle: 'Master PMP®, Scrum Alliance CSM®, SAFe® 6.0, and Cloud Architecture.', cta: 'Explore Courses', ctaSecondary: 'Speak to Counselor', stats: '4,500+ Certified Professionals · 99.2% Pass Rate' },
     courses: { label: 'GLOBALLY ACCREDITED CURRICULUM', title: 'Popular Certification Programs', lead: 'Accelerate your career with globally accredited programs.', viewAll: 'VIEW ALL COURSES', viewDetails: 'View Details' },
     features: { label: 'TRAINING HIGHLIGHTS', title: 'PMP Training Key Features' },
     why: { label: 'WHY EZYCERTIFY', title: 'Built For First-Attempt Exam Success' },
