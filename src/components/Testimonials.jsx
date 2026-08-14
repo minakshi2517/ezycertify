@@ -14,7 +14,7 @@ export default function Testimonials() {
             <span className="section-label">VERIFIED ALUMNI SUCCESS</span>
             <h2 className="section-title">Trusted by 4,500+ Professionals Worldwide</h2>
             <p className="section-lead" style={{ margin: '0 auto' }}>
-              Discover how project managers, Agile coaches, and IT leaders achieved first-attempt certification success with Ezycertify's iZenBridge-aligned curriculum.
+              Discover how project managers, Agile coaches, and IT leaders achieved first-attempt certification success with Ezycertify's accredited masterclass curriculum.
             </p>
 
             {/* Rating Badges Bar */}

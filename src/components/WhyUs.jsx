@@ -71,7 +71,7 @@ export default function WhyUs() {
                 borderRadius: 'var(--radius)',
                 border: '1px solid var(--gray-200)'
               }}>
-                At Ezycertify, we make professional credentials accessible and stress-free. Partnered with PMI, Scrum Alliance, Scaled Agile (SAFe), and PeopleCert, our iZenBridge-aligned training combines comprehensive question banks, simulated mock exams, and personalized application support so you pass on your very first try.
+                At Ezycertify, we make professional credentials accessible and stress-free. Partnered with PMI, Scrum Alliance, Scaled Agile (SAFe), and PeopleCert, our Ezycertify masterclass training combines comprehensive question banks, simulated mock exams, and personalized application support so you pass on your very first try.
               </p>
             </div>
 

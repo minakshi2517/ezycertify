@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom'
+import { useApp } from '../context/AppContext'
 import { PHONE_NUMBER, ADDRESS_TEXT, EMAIL_ADDRESS } from '../data/siteData'
 
 export default function Footer() {
+  const { t } = useApp()
+
   return (
     <footer className="footer">
       <div className="container">
@@ -15,7 +18,7 @@ export default function Footer() {
               />
             </Link>
             <p>
-              Ezycertify empowers professionals worldwide with globally accredited certification training. Aligned with iZenBridge’s world-class curriculum, we deliver result-driven PMP®, Scrum Alliance CSM®, SAFe® 6.0, PMI-ACP®, and ITIL® 4 programs.
+              {t.footer?.tagline || 'Ezycertify empowers professionals worldwide with globally recognized certification programs. From PMP®, Scrum Alliance CSM®, SAFe® 6.0, PMI-ACP®, and ITIL® 4, we deliver trusted, result-driven training that makes certification easy and accelerates career success.'}
             </p>
 
             <div className="social-icons">
@@ -71,7 +74,7 @@ export default function Footer() {
           </div>
 
           <div className="footer-links">
-            <h4>Popular Programs</h4>
+            <h4>{t.footer?.certifications || 'Popular Certifications'}</h4>
             <ul>
               <li><Link to="/courses/pmp-certification-training">PMP® Certification</Link></li>
               <li><Link to="/courses/certified-scrum-master-csm">Certified ScrumMaster® (CSM)</Link></li>
@@ -83,46 +86,50 @@ export default function Footer() {
           </div>
 
           <div className="footer-links">
-            <h4>Solutions & Resources</h4>
+            <h4>{t.footer?.quickLinks || 'Quick Links'}</h4>
             <ul>
-              <li><Link to="/enterprise">Enterprise Training</Link></li>
-              <li><Link to="/free-practice-test">Free PMP® Simulator</Link></li>
-              <li><Link to="/courses">All Courses</Link></li>
-              <li><Link to="/career">Careers</Link></li>
-              <li><Link to="/about">About Us</Link></li>
-              <li><Link to="/verify">Verify Credentials</Link></li>
+              <li><Link to="/courses">{t.nav?.courses || 'All Courses'}</Link></li>
+              <li><Link to="/career">{t.nav?.career || 'Career'}</Link></li>
+              <li><Link to="/about">{t.nav?.about || 'About'}</Link></li>
+              <li><Link to="/contact">{t.nav?.contact || 'Contact Support'}</Link></li>
+              <li><Link to="/login">{t.nav?.signIn || 'Student Portal'}</Link></li>
             </ul>
           </div>
 
           <div className="footer-links">
-            <h4>Contact & Support</h4>
+            <h4>Contact Info</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.75)' }}>
               <div>
                 <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Corporate Office</strong>
                 <span>{ADDRESS_TEXT}</span>
               </div>
               <div>
-                <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Phone & WhatsApp</strong>
+                <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Phone Support</strong>
                 <span>{PHONE_NUMBER}</span>
               </div>
               <div>
                 <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Email Inquiries</strong>
                 <span>{EMAIL_ADDRESS}</span>
               </div>
+              <div>
+                <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Working Hours</strong>
+                <span>Monday – Saturday (9:00 AM – 7:00 PM IST)</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Global Legal Disclaimers */}
-        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '1.5rem', marginTop: '2.5rem', fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.5)', lineHeight: 1.6 }}>
-          <p>
-            "PMI", "PMP", "PMI-ACP", "PMI-PBA", "PgMP", and "PMBOK" are registered marks of the Project Management Institute, Inc. "CSM", "CSPO", and "CST" are registered trademarks of Scrum Alliance®. "SAFe" is a registered trademark of Scaled Agile, Inc. "ITIL" is a registered trademark of AXELOS Limited / PeopleCert. Ezycertify is aligned with iZenBridge’s accredited curriculum.
-          </p>
-        </div>
-
-        <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} Ezycertify. All Rights Reserved.</span>
-          <span>Making Certification Easy</span>
+        <div className="footer-bottom" style={{ flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between' }}>
+          <span>© {new Date().getFullYear()} Ezycertify. {t.footer?.rights || 'All Rights Reserved.'}</span>
+          <div style={{ display: 'flex', gap: '1.25rem', fontSize: '0.82rem' }}>
+            <Link to="/privacy-policy" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'none' }}>
+              Privacy & Data Protection Policy
+            </Link>
+            <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>·</span>
+            <Link to="/terms-of-service" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'none' }}>
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

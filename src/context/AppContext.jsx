@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo } from 'react'
 import { languages } from '../data/siteData'
-import { getTranslation } from '../data/translations'
+import { getTranslation, translateText } from '../data/translations'
 
 const AppContext = createContext(null)
 
@@ -20,6 +20,8 @@ export function AppProvider({ children }) {
   )
 
   const t = useMemo(() => getTranslation(language), [language])
+
+  const tr = useCallback((text) => translateText(text, language), [language])
 
   const setLanguage = useCallback((code) => {
     setLanguageState(code)
@@ -53,6 +55,7 @@ export function AppProvider({ children }) {
     locale: langConfig.locale,
     languages,
     t,
+    tr,
     user,
     signIn,
     signUp,

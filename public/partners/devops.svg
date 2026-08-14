@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 48" role="img" aria-label="DevOps Institute">
+  <rect x="4" y="8" width="32" height="32" rx="6" fill="#D92528"/>
+  <path d="M12 24 C12 18, 28 30, 28 24 C28 18, 12 30, 12 24 Z" stroke="#ffffff" stroke-width="2.5" fill="none"/>
+  <text x="44" y="30" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="#1E293B">DevOps</text>
+</svg>

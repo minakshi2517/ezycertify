@@ -1,28 +1,44 @@
 import { useState } from 'react'
-import { ADDRESS_TEXT, PHONE_NUMBER, EMAIL_ADDRESS } from '../data/siteData'
+import { ADDRESS_TEXT, PHONE_NUMBER, EMAIL_ADDRESS, courses, partnerLogos } from '../data/siteData'
+import { globalCountryCodes } from '../data/countryData'
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false)
-  const [form, setForm] = useState({ name: '', email: '', phone: '', course: 'PMP® Certification', message: '' })
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    countryCode: '+1',
+    phone: '',
+    course: '',
+    otherCourse: '',
+    message: '',
+  })
+
+  const activeCountry = globalCountryCodes.find((c) => c.code === form.countryCode) || globalCountryCodes[0]
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    if (!form.course) return
+    if (form.course === 'Other' && !form.otherCourse.trim()) return
+
     setSubmitted(true)
     setTimeout(() => {
       setSubmitted(false)
-      setForm({ name: '', email: '', phone: '', course: 'PMP® Certification', message: '' })
-    }, 3000)
+      setForm({ name: '', email: '', countryCode: '+1', phone: '', course: '', otherCourse: '', message: '' })
+    }, 3500)
   }
+
+  const displayCourseName = form.course === 'Other' ? form.otherCourse : form.course
 
   return (
     <div style={{ paddingTop: 'calc(var(--header-h) + 2rem)', paddingBottom: '5rem' }}>
       <div className="container">
         {/* Banner Header */}
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <span className="section-label">GET IN TOUCH</span>
+          <span className="section-label">GLOBAL LEARNER SUPPORT</span>
           <h1 className="section-title">We'd Love to Hear From You</h1>
           <p className="section-lead" style={{ margin: '0 auto' }}>
-            Have questions about course fees, batch schedules, or PMP application approval support? Contact Ezycertify advisors today.
+            Have questions about global virtual cohorts, accredited training, or application approval support? Contact Ezycertify advisors today.
           </p>
         </div>
 
@@ -52,7 +68,7 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)' }}>Phone & WhatsApp</h3>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)' }}>Global Phone & WhatsApp</h3>
                   <p style={{ fontSize: '0.95rem', color: 'var(--blue)', fontWeight: 700, marginTop: '0.2rem' }}>{PHONE_NUMBER}</p>
                 </div>
               </div>
@@ -74,9 +90,9 @@ export default function ContactPage() {
             </div>
 
             <div style={{ background: 'var(--navy)', color: 'var(--white)', padding: '2rem', borderRadius: 'var(--radius)' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#60a5fa', marginBottom: '0.5rem' }}>Operating Hours</h3>
-              <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.85)' }}>Monday - Saturday: 9:00 AM - 7:00 PM IST</p>
-              <p style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.65)', marginTop: '0.3rem' }}>24x7 Support Available for Enrolled Students</p>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#60a5fa', marginBottom: '0.5rem' }}>Global Virtual Cohorts</h3>
+              <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.85)' }}>Americas, EMEA, APAC Timezone Cohorts Available</p>
+              <p style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.65)', marginTop: '0.3rem' }}>24x7 Academic Support & Exam Application Approval Guidance</p>
             </div>
           </div>
 
@@ -84,18 +100,19 @@ export default function ContactPage() {
           <div style={{ background: 'var(--white)', padding: '3rem 2.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-md)' }}>
             {submitted ? (
               <div style={{ textAlign: 'center', padding: '3rem 0' }}>
-                <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--navy)' }}>Message Received!</h3>
-                <p style={{ color: 'var(--gray-600)', marginTop: '0.5rem' }}>
-                  Thank you for reaching out, <strong>{form.name}</strong>. Our counselor will respond within 2 hours.
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
+                <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--navy)' }}>Inquiry Received!</h3>
+                <p style={{ color: 'var(--gray-600)', marginTop: '0.5rem', lineHeight: 1.6 }}>
+                  Thank you for reaching out, <strong>{form.name}</strong>. An Ezycertify global academic counselor will contact you at <strong>{form.countryCode} {form.phone}</strong> regarding <strong>{displayCourseName}</strong> shortly.
                 </p>
               </div>
             ) : (
               <>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--navy)', marginBottom: '0.5rem' }}>
-                  Send Us a Message
+                  Send Us an Inquiry
                 </h2>
                 <p style={{ fontSize: '0.9rem', color: 'var(--gray-600)', marginBottom: '2rem' }}>
-                  Fill out the form below and an Ezycertify counselor will call or email you back promptly.
+                  Select your desired accredited course and submit your contact information.
                 </p>
 
                 <form onSubmit={handleSubmit}>
@@ -105,7 +122,7 @@ export default function ContactPage() {
                       type="text"
                       className="form-input"
                       required
-                      placeholder="e.g. Rahul Sharma"
+                      placeholder="e.g. Alex Johnson"
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                     />
@@ -117,7 +134,7 @@ export default function ContactPage() {
                       type="email"
                       className="form-input"
                       required
-                      placeholder="rahul@example.com"
+                      placeholder="alex.johnson@example.com"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                     />
@@ -125,45 +142,86 @@ export default function ContactPage() {
 
                   <div className="form-group">
                     <label>Phone Number *</label>
-                    <input
-                      type="tel"
-                      className="form-input"
-                      required
-                      placeholder="+91 98765 43210"
-                      value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    />
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <select
+                        className="form-input"
+                        style={{ width: '100px', flexShrink: 0, paddingLeft: '0.4rem', paddingRight: '0.1rem', fontSize: '0.85rem', fontWeight: 600 }}
+                        value={form.countryCode}
+                        onChange={(e) => setForm({ ...form, countryCode: e.target.value })}
+                      >
+                        {globalCountryCodes.map((c, i) => (
+                          <option key={i} value={c.code}>
+                            {c.flag} {c.code} ({c.name})
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        className="form-input"
+                        required
+                        placeholder={activeCountry.placeholder}
+                        value={form.phone}
+                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      />
+                    </div>
                   </div>
 
                   <div className="form-group">
-                    <label>Course Interested In</label>
+                    <label>Course Interested In *</label>
                     <select
                       className="form-input"
+                      required
                       value={form.course}
                       onChange={(e) => setForm({ ...form, course: e.target.value })}
+                      style={{ fontSize: '0.88rem', fontWeight: form.course ? 600 : 400 }}
                     >
-                      <option value="PMP® Certification">PMP® Certification</option>
-                      <option value="Certified ScrumMaster (CSM)">Certified ScrumMaster (CSM)</option>
-                      <option value="Leading SAFe 6.0">Leading SAFe 6.0</option>
-                      <option value="PMI-ACP® Agile">PMI-ACP® Agile</option>
-                      <option value="PMI-PBA® Business Analysis">PMI-PBA® Business Analysis</option>
-                      <option value="ITIL® 4 Foundation">ITIL® 4 Foundation</option>
+                      <option value="" disabled>-- Choose your course * --</option>
+                      {partnerLogos.map((provider) => {
+                        const providerCourses = courses.filter((c) => c.providerId === provider.id)
+                        return (
+                          <optgroup key={provider.id} label={`--- ${provider.name} ---`}>
+                            {providerCourses.map((c) => (
+                              <option key={c.id} value={c.title}>
+                                {c.title}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )
+                      })}
+                      <option value="Other" style={{ fontWeight: 800, color: 'var(--blue)' }}>✏️ Other (Specify course manually below)</option>
                     </select>
+
+                    {/* Dynamic Manual Course Input if 'Other' is selected */}
+                    {form.course === 'Other' && (
+                      <div style={{ marginTop: '0.85rem' }}>
+                        <label style={{ fontSize: '0.84rem', color: 'var(--blue)', fontWeight: 700, marginBottom: '0.35rem', display: 'block' }}>
+                          Specify Course Name *
+                        </label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          required
+                          placeholder="Enter the course or certification you are looking for..."
+                          value={form.otherCourse}
+                          onChange={(e) => setForm({ ...form, otherCourse: e.target.value })}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-group">
-                    <label>Message / Question</label>
+                    <label>Message / Career Goals (Optional)</label>
                     <textarea
                       className="form-input"
-                      rows="4"
-                      placeholder="How can we help you?"
+                      rows="3"
+                      placeholder="Share your current career background or exam timeframe..."
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
                     />
                   </div>
 
                   <button type="submit" className="btn btn-red" style={{ width: '100%', marginTop: '1rem' }}>
-                    Submit Inquiry
+                    Submit Global Inquiry
                   </button>
                 </form>
               </>

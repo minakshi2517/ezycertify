@@ -18,7 +18,7 @@ export default function AboutPage() {
 
   const pillars = [
     {
-      title: 'iZenBridge Aligned Curriculum',
+      title: 'Ezycertify Masterclass Framework',
       desc: 'Mapped directly to the latest Exam Content Outlines (ECO) with 2,500+ practice questions and 8 full-length simulated mock exams.',
       iconSvg: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -204,7 +204,7 @@ export default function AboutPage() {
               Ezycertify was founded with a clear objective: to take the guesswork out of professional accreditation. Navigating eligibility guidelines, writing PM experience descriptions, and preparing for 180-question exams can be intimidating for working professionals.
             </p>
             <p style={{ fontSize: '1.05rem', color: 'var(--gray-600)', lineHeight: 1.8 }}>
-              By integrating iZenBridge’s proven pedagogical framework, direct mentor access, and comprehensive mock portals, we turn intimidating certification exams into structured, achievable milestones.
+              By integrating Ezycertify’s proven pedagogical framework, direct mentor access, and comprehensive mock portals, we turn intimidating certification exams into structured, achievable milestones.
             </p>
           </div>
         </div>

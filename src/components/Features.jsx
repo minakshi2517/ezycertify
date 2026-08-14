@@ -26,7 +26,7 @@ export default function Features() {
             <div className="pillar-card">
               <h3 className="pillar-title">Proven Curriculum</h3>
               <p className="pillar-desc">
-                Leverage iZenBridge-aligned study materials, ECO domain breakdowns, and 2500+ practice questions designed to help you pass on your first attempt.
+                Leverage Ezycertify proprietary study materials, ECO domain breakdowns, and 2500+ practice questions designed to help you pass on your first attempt.
               </p>
             </div>
             <div className="pillar-card">

@@ -3,7 +3,6 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import WhatsAppWidget from './components/WhatsAppWidget'
-import CallbackBar from './components/CallbackBar'
 import HomePage from './pages/HomePage'
 import CoursesPage from './pages/CoursesPage'
 import CourseDetailPage from './pages/CourseDetailPage'
@@ -13,8 +12,10 @@ import ContactPage from './pages/ContactPage'
 import VerifyCertPage from './pages/VerifyCertPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
-import EnterprisePage from './pages/EnterprisePage'
-import FreePracticeTestPage from './pages/FreePracticeTestPage'
+import PartnerPage from './pages/PartnerPage'
+import PrivacyPage from './pages/PrivacyPage'
+import TermsPage from './pages/TermsPage'
+import CookieBanner from './components/CookieBanner'
 import { useScrollRevealDeps } from './hooks/useScrollReveal'
 
 function ScrollToTop() {
@@ -37,7 +38,7 @@ function Layout({ children, hideFooter = false }) {
       <main id="main-content">{children}</main>
       {!hideFooter && <Footer />}
       <WhatsAppWidget />
-      <CallbackBar />
+      <CookieBanner />
     </>
   )
 }
@@ -70,18 +71,10 @@ export default function App() {
         }
       />
       <Route
-        path="/enterprise"
+        path="/partners/:providerId"
         element={
           <Layout>
-            <EnterprisePage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/free-practice-test"
-        element={
-          <Layout>
-            <FreePracticeTestPage />
+            <PartnerPage />
           </Layout>
         }
       />
@@ -106,6 +99,22 @@ export default function App() {
         element={
           <Layout>
             <ContactPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/privacy-policy"
+        element={
+          <Layout>
+            <PrivacyPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/terms-of-service"
+        element={
+          <Layout>
+            <TermsPage />
           </Layout>
         }
       />
