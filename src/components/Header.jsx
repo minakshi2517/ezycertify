@@ -206,7 +206,7 @@ export default function Header() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="What do you want to learn today?"
+                  placeholder="Find your course..."
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value)
