@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { courses, partnerLogos } from '../data/siteData'
+import PaymentModal from './PaymentModal'
 
-export function CourseCard({ course }) {
+export function CourseCard({ course, onEnroll }) {
   const { t, tr } = useApp()
 
   const handleImageError = (e) => {
@@ -33,17 +34,17 @@ export function CourseCard({ course }) {
       <div className="course-card-body">
         <h3 className="course-card-title">{tr(course.title) || course.shortTitle}</h3>
         <p className="course-card-desc">{course.description}</p>
-        <div className="course-card-meta" style={{ alignItems: 'center' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0074e4', display: 'inline-flex', alignItems: 'center', gap: '0.45rem', background: '#eff6ff', padding: '0.35rem 0.85rem', borderRadius: '20px', border: '1px solid #bfdbfe' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0074e4" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            <span>{course.duration || 'Live Virtual Cohort'}</span>
-          </span>
+        <div className="course-card-meta" style={{ alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
           <Link to={`/courses/${course.slug}`} className="btn btn-blue btn-sm">
             {t.courses?.viewDetails || 'View Details'}
           </Link>
+          <button
+            onClick={() => onEnroll && onEnroll(course)}
+            className="btn btn-red btn-sm"
+            style={{ fontWeight: 700 }}
+          >
+            Enroll & Pay 🔒
+          </button>
         </div>
       </div>
     </div>
@@ -54,6 +55,7 @@ export default function CoursesSection({ limit = 8 }) {
   const { t } = useApp()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProvider, setSelectedProvider] = useState('all')
+  const [selectedCourse, setSelectedCourse] = useState(null)
 
   const filterTabs = [
     { id: 'all', label: 'All Bodies (64)' },
@@ -228,7 +230,11 @@ export default function CoursesSection({ limit = 8 }) {
           {displayCourses.length > 0 ? (
             <div className="courses-grid">
               {displayCourses.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  onEnroll={(c) => setSelectedCourse(c)}
+                />
               ))}
             </div>
           ) : (
@@ -259,6 +265,15 @@ export default function CoursesSection({ limit = 8 }) {
                 Explore All 64 Accredited Certification Programs →
               </Link>
             </div>
+          )}
+
+          {/* Payment Modal */}
+          {selectedCourse && (
+            <PaymentModal
+              course={selectedCourse}
+              batch="Upcoming Weekend Live Cohort"
+              onClose={() => setSelectedCourse(null)}
+            />
           )}
         </div>
       </div>

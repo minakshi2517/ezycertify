@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom'
 import { courses, courseCategories, partnerLogos } from '../data/siteData'
 import { CourseCard } from '../components/CoursesSection'
 import { useApp } from '../context/AppContext'
+import PaymentModal from '../components/PaymentModal'
 
 export default function CoursesPage() {
   const { tr } = useApp()
   const [activeCategory, setActiveCategory] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('popular')
+  const [selectedCourse, setSelectedCourse] = useState(null)
 
   const filtered = useMemo(() => {
     let result = courses.filter((course) => {
@@ -395,9 +397,22 @@ export default function CoursesPage() {
           ) : (
             <div className="courses-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: '2rem' }}>
               {filtered.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  onEnroll={(c) => setSelectedCourse(c)}
+                />
               ))}
             </div>
+          )}
+
+          {/* Secure Payment Modal */}
+          {selectedCourse && (
+            <PaymentModal
+              course={selectedCourse}
+              batch="Upcoming Weekend Live Virtual Cohort"
+              onClose={() => setSelectedCourse(null)}
+            />
           )}
 
         </div>
