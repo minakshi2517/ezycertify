@@ -2,6 +2,9 @@ export const WHATSAPP_NUMBER = '919685140726'
 export const PHONE_NUMBER = '+91 96851 40726'
 export const ADDRESS_TEXT = '11th floor - 1101 Aeropolis Phase 1 - Opp SBI Bank, Porwal Road Lohegaon Pune - 411047'
 export const EMAIL_ADDRESS = 'info@ezycertify.com'
+export const WHATSAPP_LINK = 'https://wa.me/message/DRE4LOL5H2Q3N1'
+export const INSTAGRAM_LINK = 'https://www.instagram.com/ezycertify/?hl=en'
+export const LINKEDIN_LINK = 'https://www.linkedin.com/in/ezy-certify-5b4167429/'
 
 export const languages = [
   { code: 'en-US', label: 'English (US)', flag: '🇺🇸', currency: 'USD', symbol: '$', locale: 'en-US' },

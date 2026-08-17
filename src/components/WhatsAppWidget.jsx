@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
-import { WHATSAPP_NUMBER, whatsappPresets } from '../data/siteData'
+import { WHATSAPP_LINK, whatsappPresets } from '../data/siteData'
 
 function WhatsAppIcon() {
   return (
@@ -28,7 +28,7 @@ export default function WhatsAppWidget() {
     }
     if (!message) return
 
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+    const url = `${WHATSAPP_LINK}?text=${encodeURIComponent(message)}`
     window.open(url, '_blank', 'noopener,noreferrer')
     setOpen(false)
     setSelected(null)

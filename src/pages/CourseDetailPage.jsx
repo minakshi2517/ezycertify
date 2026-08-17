@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getCourseBySlug, formatPrice, PHONE_NUMBER } from '../data/siteData'
+import { getCourseBySlug, formatPrice, PHONE_NUMBER, WHATSAPP_LINK } from '../data/siteData'
 
 export default function CourseDetailPage() {
   const { slug } = useParams()
@@ -110,7 +110,7 @@ export default function CourseDetailPage() {
                 Enroll Now
               </button>
               <a
-                href={`https://wa.me/${PHONE_NUMBER.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMsg)}`}
+                href={`${WHATSAPP_LINK}?text=${encodeURIComponent(whatsappMsg)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-outline-navy"

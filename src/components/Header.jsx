@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { courses, PHONE_NUMBER } from '../data/siteData'
+import { courses, PHONE_NUMBER, WHATSAPP_LINK } from '../data/siteData'
 
 export default function Header() {
   const { language, setLanguage, languages, currency, user, signOut, t } = useApp()
@@ -183,7 +183,7 @@ export default function Header() {
                           <p style={{ fontSize: '0.8rem', color: 'var(--gray-600)' }}>Speak directly with an Ezycertify authorized academic counselor.</p>
                         </div>
                         <a
-                          href={`https://wa.me/${PHONE_NUMBER.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(counselorWhatsApp)}`}
+                          href={`${WHATSAPP_LINK}?text=${encodeURIComponent(counselorWhatsApp)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn btn-red btn-sm"

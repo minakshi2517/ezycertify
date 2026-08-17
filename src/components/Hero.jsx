@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { PHONE_NUMBER } from '../data/siteData'
+import { PHONE_NUMBER, WHATSAPP_LINK } from '../data/siteData'
 
 export default function Hero() {
   const { t } = useApp()
@@ -34,7 +34,7 @@ export default function Hero() {
               </Link>
               
               <a
-                href={`https://wa.me/${PHONE_NUMBER.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappCounsel)}`}
+                href={`${WHATSAPP_LINK}?text=${encodeURIComponent(whatsappCounsel)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-hero-secondary"

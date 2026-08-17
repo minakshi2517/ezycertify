@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { PHONE_NUMBER } from '../data/siteData'
+import { PHONE_NUMBER, WHATSAPP_LINK } from '../data/siteData'
 
 export default function AboutPage() {
   const stats = [
@@ -105,7 +105,7 @@ export default function AboutPage() {
                 Explore Accredited Courses
               </Link>
               <a
-                href={`https://wa.me/${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
+                href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-outline-white btn-lg"
