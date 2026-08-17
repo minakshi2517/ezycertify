@@ -21,7 +21,7 @@ export default function Footer() {
               {t.footer?.desc || 'Ezycertify is a globally accredited professional certification training academy delivering live virtual cohorts with 100% exam application approval mentorship.'}
             </p>
 
-            <div className="footer-social">
+            <div className="social-icons">
               <a
                 href={INSTAGRAM_LINK}
                 target="_blank"
