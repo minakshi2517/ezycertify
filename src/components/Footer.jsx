@@ -93,11 +93,15 @@ export default function Footer() {
               </div>
               <div>
                 <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Phone Support</strong>
-                <span>{PHONE_NUMBER}</span>
+                <a href={`tel:${PHONE_NUMBER.replace(/[^0-9+]/g, '')}`} style={{ color: '#ffffff', textDecoration: 'underline', fontWeight: 600 }}>
+                  {PHONE_NUMBER}
+                </a>
               </div>
               <div>
                 <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Email Inquiries</strong>
-                <span>{EMAIL_ADDRESS}</span>
+                <a href={`mailto:${EMAIL_ADDRESS}`} style={{ color: '#ffffff', textDecoration: 'underline', fontWeight: 600 }}>
+                  {EMAIL_ADDRESS}
+                </a>
               </div>
               <div>
                 <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Working Hours</strong>
@@ -110,11 +114,11 @@ export default function Footer() {
         <div className="footer-bottom" style={{ flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between' }}>
           <span>© {new Date().getFullYear()} Ezycertify. {t.footer?.rights || 'All Rights Reserved.'}</span>
           <div style={{ display: 'flex', gap: '1.25rem', fontSize: '0.82rem' }}>
-            <Link to="/privacy-policy" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'none' }}>
+            <Link to="/privacy" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'none' }}>
               Privacy & Data Protection Policy
             </Link>
             <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>·</span>
-            <Link to="/terms-of-service" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'none' }}>
+            <Link to="/terms" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'none' }}>
               Terms of Service
             </Link>
           </div>
