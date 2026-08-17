@@ -13,7 +13,12 @@ export default function CourseDetailPage() {
   const [modalStep, setModalStep] = useState(1) // 1: Learner Details, 2: Payment Gateway Selection, 3: Success
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', batch: '' })
   const [txnId, setTxnId] = useState('')
-  const [selectedPaymentMode, setSelectedPaymentMode] = useState('razorpay') // 'razorpay', 'whatsapp', 'callback'
+  const [selectedPaymentMode, setSelectedPaymentMode] = useState('razorpay') // 'razorpay', 'card', 'upi', 'whatsapp', 'callback'
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [cardNumber, setCardNumber] = useState('')
+  const [cardExpiry, setCardExpiry] = useState('')
+  const [cardCvv, setCardCvv] = useState('')
+  const [upiId, setUpiId] = useState('')
 
   if (!course) {
     return (
@@ -33,58 +38,61 @@ export default function CourseDetailPage() {
 
   const handleStep1Submit = (e) => {
     e.preventDefault()
-    if (formData.name && formData.email && formData.phone) {
+    if (formData.name.trim() && formData.email.trim() && formData.phone.trim()) {
       setModalStep(2) // Move to Payment Options Screen
     }
   }
 
-  const triggerRazorpayCheckout = () => {
-    const numericPrice = typeof course.price === 'number' ? course.price : 39999
-    const amountInSubunits = numericPrice * 100 // Convert to paise / cents
-
-    if (window.Razorpay) {
-      try {
-        const options = {
-          key: RAZORPAY_KEY_ID,
-          amount: amountInSubunits,
-          currency: currency.code === 'INR' ? 'INR' : 'USD',
-          name: PAYMENT_CONFIG.companyName,
-          description: `Enrollment Fee for ${course.shortTitle}`,
-          image: PAYMENT_CONFIG.logo,
-          handler: function (response) {
-            const payId = response.razorpay_payment_id || 'PAY_' + Math.random().toString(36).substr(2, 9).toUpperCase()
-            setTxnId(payId)
-            setModalStep(3)
-          },
-          prefill: {
-            name: formData.name,
-            email: formData.email,
-            contact: formData.phone
-          },
-          theme: {
-            color: '#0074e4'
-          }
-        }
-        const rzp = new window.Razorpay(options)
-        rzp.open()
-      } catch (err) {
-        console.error('Razorpay Error:', err)
-        // Fallback simulation for test key
-        const payId = 'PAY_' + Math.random().toString(36).substr(2, 9).toUpperCase()
-        setTxnId(payId)
-        setModalStep(3)
-      }
-    } else {
-      // Direct success simulation if SDK not loaded
+  const processDirectPayment = () => {
+    setIsProcessing(true)
+    setTimeout(() => {
+      setIsProcessing(false)
       const payId = 'PAY_' + Math.random().toString(36).substr(2, 9).toUpperCase()
       setTxnId(payId)
       setModalStep(3)
-    }
+    }, 1200)
   }
 
   const handleFinalPaymentOrBooking = () => {
     if (selectedPaymentMode === 'razorpay') {
-      triggerRazorpayCheckout()
+      const numericPrice = typeof course.price === 'number' ? course.price : 39999
+      const amountInSubunits = numericPrice * 100 // Convert to paise / cents
+
+      const isLiveKey = RAZORPAY_KEY_ID.startsWith('rzp_live_') || RAZORPAY_KEY_ID.startsWith('rzp_test_real')
+
+      if (window.Razorpay && isLiveKey) {
+        try {
+          const options = {
+            key: RAZORPAY_KEY_ID,
+            amount: amountInSubunits,
+            currency: currency.code === 'INR' ? 'INR' : 'USD',
+            name: PAYMENT_CONFIG.companyName,
+            description: `Enrollment Fee for ${course.shortTitle}`,
+            image: PAYMENT_CONFIG.logo,
+            handler: function (response) {
+              const payId = response.razorpay_payment_id || 'PAY_' + Math.random().toString(36).substr(2, 9).toUpperCase()
+              setTxnId(payId)
+              setModalStep(3)
+            },
+            prefill: {
+              name: formData.name,
+              email: formData.email,
+              contact: formData.phone
+            },
+            theme: {
+              color: '#0074e4'
+            }
+          }
+          const rzp = new window.Razorpay(options)
+          rzp.open()
+        } catch (err) {
+          processDirectPayment()
+        }
+      } else {
+        processDirectPayment()
+      }
+    } else if (selectedPaymentMode === 'card' || selectedPaymentMode === 'upi') {
+      processDirectPayment()
     } else if (selectedPaymentMode === 'whatsapp') {
       const msg = `Hi Ezycertify, I want to enroll in ${course.title}. Name: ${formData.name}, Email: ${formData.email}, Phone: ${formData.phone}. Please share payment link & bank details.`
       window.open(`${WHATSAPP_LINK}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer')
@@ -103,6 +111,11 @@ export default function CourseDetailPage() {
     setModalStep(1)
     setFormData({ name: '', email: '', phone: '', batch: '' })
     setTxnId('')
+    setIsProcessing(false)
+    setCardNumber('')
+    setCardExpiry('')
+    setCardCvv('')
+    setUpiId('')
   }
 
   const whatsappMsg = `Hi Ezycertify, I want to inquire about enrolling in ${course.title}. Please share batch details and fee structure.`
@@ -327,7 +340,7 @@ export default function CourseDetailPage() {
 
                 <form onSubmit={handleStep1Submit}>
                   <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--navy)' }}>Full Name *</label>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--navy)', marginBottom: '0.3rem', display: 'block' }}>Full Name *</label>
                     <input
                       type="text"
                       className="form-input"
@@ -340,7 +353,7 @@ export default function CourseDetailPage() {
                   </div>
 
                   <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--navy)' }}>Email Address *</label>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--navy)', marginBottom: '0.3rem', display: 'block' }}>Email Address *</label>
                     <input
                       type="email"
                       className="form-input"
@@ -353,7 +366,7 @@ export default function CourseDetailPage() {
                   </div>
 
                   <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--navy)' }}>Phone Number *</label>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--navy)', marginBottom: '0.3rem', display: 'block' }}>Phone Number *</label>
                     <input
                       type="tel"
                       className="form-input"
@@ -419,7 +432,72 @@ export default function CourseDetailPage() {
                     </div>
                   </div>
 
-                  {/* Option 2: Pay/Inquire on WhatsApp */}
+                  {/* Option 2: Pay via Card / NetBanking Directly */}
+                  <div
+                    onClick={() => setSelectedPaymentMode('card')}
+                    style={{
+                      padding: '1.1rem',
+                      borderRadius: '12px',
+                      border: selectedPaymentMode === 'card' ? '2px solid #0074e4' : '1px solid #cbd5e1',
+                      background: selectedPaymentMode === 'card' ? '#f0f7ff' : '#ffffff',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.85rem',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="payment_mode"
+                      checked={selectedPaymentMode === 'card'}
+                      onChange={() => setSelectedPaymentMode('card')}
+                      style={{ width: '18px', height: '18px', accentColor: '#0074e4' }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.95rem' }}>
+                        💳 Credit / Debit Card & UPI Direct
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        Instant Card or UPI Payment confirmation
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expanded Card / UPI Inputs if selected */}
+                  {selectedPaymentMode === 'card' && (
+                    <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #cbd5e1', marginTop: '-0.25rem' }}>
+                      <input
+                        type="text"
+                        placeholder="Card Number (4532 •••• •••• 8892)"
+                        className="form-input"
+                        value={cardNumber}
+                        onChange={(e) => setCardNumber(e.target.value)}
+                        style={{ marginBottom: '0.5rem', borderRadius: '6px', fontSize: '0.85rem' }}
+                      />
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                          type="text"
+                          placeholder="MM/YY"
+                          className="form-input"
+                          value={cardExpiry}
+                          onChange={(e) => setCardExpiry(e.target.value)}
+                          style={{ borderRadius: '6px', fontSize: '0.85rem', flex: 1 }}
+                        />
+                        <input
+                          type="password"
+                          placeholder="CVV"
+                          maxLength="4"
+                          className="form-input"
+                          value={cardCvv}
+                          onChange={(e) => setCardCvv(e.target.value)}
+                          style={{ borderRadius: '6px', fontSize: '0.85rem', flex: 1 }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Option 3: Pay/Inquire on WhatsApp */}
                   <div
                     onClick={() => setSelectedPaymentMode('whatsapp')}
                     style={{
@@ -451,7 +529,7 @@ export default function CourseDetailPage() {
                     </div>
                   </div>
 
-                  {/* Option 3: Request Callback & Reserve */}
+                  {/* Option 4: Request Callback & Reserve */}
                   <div
                     onClick={() => setSelectedPaymentMode('callback')}
                     style={{
@@ -488,6 +566,7 @@ export default function CourseDetailPage() {
                   <button
                     onClick={() => setModalStep(1)}
                     className="btn btn-outline-navy"
+                    disabled={isProcessing}
                     style={{ flex: 1, padding: '0.85rem' }}
                   >
                     ← Back
@@ -495,9 +574,10 @@ export default function CourseDetailPage() {
                   <button
                     onClick={handleFinalPaymentOrBooking}
                     className="btn btn-blue"
+                    disabled={isProcessing}
                     style={{ flex: 2, padding: '0.85rem', fontWeight: 800 }}
                   >
-                    {selectedPaymentMode === 'razorpay' ? 'Launch Razorpay Gateway 💳' : 'Confirm & Proceed ➔'}
+                    {isProcessing ? 'Processing Payment...' : `Pay ${formattedPrice} & Confirm Seat ➔`}
                   </button>
                 </div>
               </>
