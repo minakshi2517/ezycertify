@@ -4,7 +4,10 @@ import fs from 'fs'
 import bcrypt from 'bcryptjs'
 import { courses } from '../../src/data/siteData.js'
 
-const DATA_DIR = path.join(process.cwd(), 'server', 'data')
+const DATA_DIR = process.env.VERCEL
+  ? path.join('/tmp', 'data')
+  : path.join(process.cwd(), 'server', 'data')
+
 fs.mkdirSync(DATA_DIR, { recursive: true })
 
 const DB_PATH = path.join(DATA_DIR, 'ezycertify.db')
