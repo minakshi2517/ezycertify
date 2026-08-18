@@ -37,7 +37,7 @@ export default function PrivacyPage() {
             <ul style={{ paddingLeft: '1.25rem', color: '#475569', lineHeight: 1.8, fontSize: '0.95rem' }}>
               <li><strong>Personal Identity Data:</strong> Full Name, Email Address, Contact Phone Number, Billing Address, Country, and Timezone preference.</li>
               <li><strong>Professional & Experience Credentials:</strong> Resume details, project management hours, educational qualification background submitted for PMP®, PgMP®, or PMI-ACP® audit prep.</li>
-              <li><strong>Financial & Payment Records:</strong> Encrypted transaction reference IDs and payment receipts. All online payments are securely processed via 256-bit SSL certified PCI-DSS compliant payment gateways (Razorpay, Stripe, PayPal). Ezycertify never stores raw credit card numbers or banking passwords.</li>
+              <li><strong>Financial & Payment Records:</strong> Encrypted transaction reference IDs and payment receipts. All online payments are securely processed via Razorpay, a PCI-DSS compliant payment gateway. Ezycertify never stores raw credit card numbers, UPI IDs, or banking passwords.</li>
               <li><strong>Learning Management System (LMS) Data:</strong> Cohort attendance records, quiz performance metrics, mock exam timer logs, live Q&A interactions, and issued course completion certificates.</li>
             </ul>
           </div>

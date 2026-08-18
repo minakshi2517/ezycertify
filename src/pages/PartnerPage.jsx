@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { partnerLogos, courses } from '../data/siteData'
 import { CourseCard } from '../components/CoursesSection'
 import { useApp } from '../context/AppContext'
+import PaymentModal from '../components/PaymentModal'
 
 export default function PartnerPage() {
   const { providerId } = useParams()
@@ -10,6 +11,7 @@ export default function PartnerPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [sortBy, setSortBy] = useState('popular')
+  const [selectedCourse, setSelectedCourse] = useState(null)
 
   // Find partner details
   const partner = useMemo(() => {
@@ -275,7 +277,11 @@ export default function PartnerPage() {
           {providerCourses.length > 0 ? (
             <div className="courses-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: '2rem' }}>
               {providerCourses.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  onEnroll={(c) => setSelectedCourse(c)}
+                />
               ))}
             </div>
           ) : (
@@ -294,6 +300,14 @@ export default function PartnerPage() {
                 Reset Search Filters
               </button>
             </div>
+          )}
+
+          {selectedCourse && (
+            <PaymentModal
+              course={selectedCourse}
+              batch="Upcoming Weekend Live Virtual Cohort"
+              onClose={() => setSelectedCourse(null)}
+            />
           )}
 
           {/* Executive Why Choose Partner Section */}

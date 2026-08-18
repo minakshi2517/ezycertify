@@ -1,553 +1,280 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { formatPrice } from '../data/siteData'
+import { loadRazorpay, postJson } from '../lib/razorpayClient'
+
+const inputStyle = {
+  width: '100%',
+  padding: '0.75rem',
+  borderRadius: '8px',
+  border: '1px solid #cbd5e1',
+  fontSize: '0.9rem',
+}
 
 export default function PaymentModal({ course, batch, onClose }) {
-  const { currency } = useApp()
-  const [step, setStep] = useState(1) // 1: Billing Info, 2: Payment Method, 3: Processing, 4: Success Invoice
-  const [method, setMethod] = useState('card') // 'card', 'upi', 'netbanking', 'razorpay'
+  const { currency, user } = useApp()
+  const displayPrice = formatPrice(course?.priceUSD, 'INR', '₹')
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    name: user?.name || '',
+    email: user?.email || '',
     phone: '',
     city: '',
-    cardNumber: '4532 •••• •••• 8912',
-    cardExp: '12/28',
-    cardCvv: '849',
-    cardName: '',
-    upiId: '',
-    bank: 'HDFC Bank'
   })
+  const [status, setStatus] = useState('form') // form | paying | success | error
+  const [error, setError] = useState('')
+  const [enrollment, setEnrollment] = useState(null)
 
-  const [orderId, setOrderId] = useState('')
-  const [txnTime, setTxnTime] = useState('')
-
-  // Calculate pricing
-  const basePrice = course?.price || 499
-  const discount = Math.round(basePrice * 0.15)
-  const finalPrice = basePrice - discount
-
-  const handleNextStep = (e) => {
+  const handlePay = async (e) => {
     e.preventDefault()
-    if (step === 1) {
-      if (!formData.name || !formData.email || !formData.phone) {
-        alert('Please fill in your Name, Email, and Phone Number.')
-        return
-      }
-      setStep(2)
-    } else if (step === 2) {
-      setStep(3)
-      // Simulate SSL Payment Gateway processing
-      setTimeout(() => {
-        const generatedId = `EZY-${Math.floor(100000 + Math.random() * 900000)}`
-        setOrderId(generatedId)
-        setTxnTime(new Date().toLocaleString())
-        setStep(4)
-      }, 2000)
+    if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
+      setError('Please fill in your name, email, and phone number.')
+      return
+    }
+
+    setError('')
+    setStatus('paying')
+
+    try {
+      const order = await postJson('/api/create-order', {
+        courseId: course.id,
+        currency,
+        batch: batch || '',
+        student: formData,
+      })
+
+      const Razorpay = await loadRazorpay()
+      let completed = false
+      const rzp = new Razorpay({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Ezycertify',
+        description: course.shortTitle || course.title,
+        image: `${window.location.origin}/logo.png`,
+        order_id: order.orderId,
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone.replace(/\s/g, ''),
+        },
+        notes: {
+          courseId: course.id,
+          batch: batch || '',
+        },
+        theme: { color: '#0074e4' },
+        modal: {
+          ondismiss: () => {
+            if (completed) return
+            setStatus('form')
+            setError('Payment window closed. You can try again when ready.')
+          },
+        },
+        handler: async (response) => {
+          completed = true
+          try {
+            const result = await postJson('/api/verify-payment', {
+              ...response,
+              courseId: course.id,
+              currency,
+              batch: batch || '',
+              student: formData,
+            })
+            setEnrollment(result.enrollment)
+            setStatus('success')
+          } catch (verifyErr) {
+            setError(verifyErr.message)
+            setStatus('error')
+          }
+        },
+      })
+
+      rzp.on('payment.failed', (resp) => {
+        setError(resp?.error?.description || 'Payment failed. Please try another method.')
+        setStatus('error')
+      })
+
+      rzp.open()
+    } catch (err) {
+      setError(err.message)
+      setStatus('error')
     }
   }
 
-  const handleDownloadInvoice = () => {
-    alert(`Downloading Official Payment Receipt for Order ${orderId} (${formatPrice(finalPrice, currency)})`)
+  const handleDownloadReceipt = () => {
+    const paidAt = enrollment?.paidAt ? new Date(enrollment.paidAt).toLocaleString() : new Date().toLocaleString()
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Ezycertify Receipt ${enrollment?.id || ''}</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 32px; color: #0f172a; }
+    h1 { color: #0f2b5c; margin-bottom: 4px; }
+    .muted { color: #64748b; }
+    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    td { padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+    .ok { color: #15803d; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>Ezycertify</h1>
+  <p class="muted">Official Fee Receipt</p>
+  <p class="ok">PAYMENT SUCCESSFUL</p>
+  <table>
+    <tr><td>Receipt ID</td><td><strong>${enrollment?.id || ''}</strong></td></tr>
+    <tr><td>Payment ID</td><td>${enrollment?.paymentId || ''}</td></tr>
+    <tr><td>Order ID</td><td>${enrollment?.orderId || ''}</td></tr>
+    <tr><td>Course</td><td>${course?.title || ''}</td></tr>
+    <tr><td>Batch</td><td>${batch || 'Upcoming Live Virtual Cohort'}</td></tr>
+    <tr><td>Student</td><td>${formData.name}</td></tr>
+    <tr><td>Email</td><td>${formData.email}</td></tr>
+    <tr><td>Phone</td><td>${formData.phone}</td></tr>
+    <tr><td>Amount Paid</td><td><strong>${displayPrice}</strong></td></tr>
+    <tr><td>Date</td><td>${paidAt}</td></tr>
+  </table>
+  <p class="muted" style="margin-top:24px">Processed securely via Razorpay. Ezycertify does not store card or UPI credentials.</p>
+  <script>window.onload = function () { window.print(); }</script>
+</body>
+</html>`
+    const win = window.open('', '_blank')
+    if (!win) {
+      alert('Please allow pop-ups to download the receipt.')
+      return
+    }
+    win.document.write(html)
+    win.document.close()
   }
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(15, 23, 42, 0.8)',
-      backdropFilter: 'blur(8px)',
-      zIndex: 3000,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem',
-      overflowY: 'auto'
-    }}>
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '16px',
-        maxWidth: '650px',
-        width: '100%',
-        position: 'relative',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        border: '1px solid #e2e8f0',
-        overflow: 'hidden'
-      }}>
-        {/* Top Header Bar */}
-        <div style={{
-          background: 'linear-gradient(135deg, #0f2b5c 0%, #1e3a8a 100%)',
-          color: '#ffffff',
-          padding: '1.25rem 1.75rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span style={{ fontSize: '1.4rem' }}>🔒</span>
-            <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: '#ffffff' }}>
-                Ezycertify Secure Checkout
-              </h3>
-              <p style={{ fontSize: '0.78rem', color: '#93c5fd', margin: 0 }}>
-                256-Bit SSL Encrypted Payment Gateway
-              </p>
-            </div>
+    <div className="pay-overlay" onClick={onClose} role="presentation">
+      <div className="pay-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="pay-title">
+        <div className="pay-header">
+          <div>
+            <h3 id="pay-title">Ezycertify Secure Checkout</h3>
+            <p>Paid via Razorpay · Cards, UPI, Netbanking & Wallets</p>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255,255,255,0.15)',
-              border: 'none',
-              color: '#ffffff',
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              fontSize: '1rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            ✕
-          </button>
+          <button type="button" className="pay-close" onClick={onClose} aria-label="Close checkout">✕</button>
         </div>
 
-        {/* Modal Content Body */}
-        <div style={{ padding: '1.75rem' }}>
-          
-          {/* Order Summary Box */}
-          <div style={{
-            background: '#f8fafc',
-            borderRadius: '12px',
-            padding: '1.25rem',
-            border: '1px solid #e2e8f0',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem'
-          }}>
+        <div className="pay-body">
+          <div className="pay-summary">
             <div>
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0074e4', background: '#eff6ff', padding: '0.2rem 0.6rem', borderRadius: '12px', textTransform: 'uppercase' }}>
-                {course?.badge || 'Masterclass'}
-              </span>
-              <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: '0.35rem 0 0.2rem' }}>
-                {course?.title || 'Certification Program'}
-              </h4>
-              <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0 }}>
-                Batch: {batch || 'Upcoming Live Virtual Cohort'}
-              </p>
+              <span className="pay-badge">{course?.badge || 'Masterclass'}</span>
+              <h4>{course?.title || 'Certification Program'}</h4>
+              <p>Batch: {batch || 'Upcoming Live Virtual Cohort'}</p>
             </div>
-
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.85rem', color: '#94a3b8', textDecoration: 'line-through' }}>
-                {formatPrice(basePrice, currency)}
-              </div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 850, color: '#16a34a' }}>
-                {formatPrice(finalPrice, currency)}
-              </div>
-              <span style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 700 }}>
-                Includes 15% Early Bird Discount
-              </span>
+            <div className="pay-price">
+              <strong>{displayPrice}</strong>
+              <span>Includes exam prep & lifetime support</span>
             </div>
           </div>
 
-          {/* Step 1: Billing & Student Info */}
-          {step === 1 && (
-            <form onSubmit={handleNextStep}>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e293b', marginBottom: '1rem' }}>
-                Step 1 of 2: Student & Billing Information
-              </h4>
+          {status === 'form' && (
+            <form onSubmit={handlePay}>
+              <h4 className="pay-step">Student & billing details</h4>
+              {error && <div className="pay-alert">{error}</div>}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="pay-grid">
                 <div>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>
-                    Full Name *
-                  </label>
+                  <label htmlFor="pay-name">Full Name *</label>
                   <input
+                    id="pay-name"
                     type="text"
                     required
                     placeholder="e.g. Rahul Sharma"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    style={inputStyle}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>
-                    Email Address *
-                  </label>
+                  <label htmlFor="pay-email">Email Address *</label>
                   <input
+                    id="pay-email"
                     type="email"
                     required
                     placeholder="rahul@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    style={inputStyle}
                   />
                 </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>
-                    Phone Number *
-                  </label>
+                  <label htmlFor="pay-phone">Phone Number *</label>
                   <input
+                    id="pay-phone"
                     type="tel"
                     required
                     placeholder="+91 98765 43210"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    style={inputStyle}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>
-                    City / Location
-                  </label>
+                  <label htmlFor="pay-city">City / Location</label>
                   <input
+                    id="pay-city"
                     type="text"
                     placeholder="e.g. Pune, India"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                    style={inputStyle}
                   />
                 </div>
               </div>
 
-              <button
-                type="submit"
-                style={{
-                  width: '100%',
-                  padding: '0.9rem',
-                  borderRadius: '8px',
-                  background: '#0074e4',
-                  color: '#ffffff',
-                  fontWeight: 800,
-                  fontSize: '1rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0, 116, 228, 0.25)'
-                }}
-              >
-                Proceed to Payment Options ➔
+              <p className="pay-secure-note">
+                You will be redirected to Razorpay Checkout. Card numbers, UPI IDs and bank passwords stay on Razorpay — Ezycertify never stores them.
+              </p>
+
+              <button type="submit" className="pay-cta">
+                Pay {displayPrice} with Razorpay
               </button>
             </form>
           )}
 
-          {/* Step 2: Payment Method Selection */}
-          {step === 2 && (
-            <form onSubmit={handleNextStep}>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1e293b', marginBottom: '1rem' }}>
-                Step 2 of 2: Select Preferred Payment Gateway Method
-              </h4>
-
-              {/* Method Selector Tabs */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '1.25rem' }}>
-                {[
-                  { id: 'card', label: '💳 Cards', desc: 'Credit / Debit' },
-                  { id: 'upi', label: '📱 UPI / QR', desc: 'GPay / PhonePe' },
-                  { id: 'netbanking', label: '🏛️ NetBanking', desc: 'All Banks' },
-                  { id: 'razorpay', label: '⚡ Razorpay', desc: 'Direct Portal' }
-                ].map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setMethod(m.id)}
-                    style={{
-                      padding: '0.75rem 0.5rem',
-                      borderRadius: '8px',
-                      border: method === m.id ? '2px solid #0074e4' : '1px solid #cbd5e1',
-                      background: method === m.id ? '#eff6ff' : '#ffffff',
-                      color: method === m.id ? '#0f2b5c' : '#475569',
-                      fontWeight: method === m.id ? 800 : 600,
-                      cursor: 'pointer',
-                      textAlign: 'center'
-                    }}
-                  >
-                    <div style={{ fontSize: '0.85rem' }}>{m.label}</div>
-                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{m.desc}</div>
-                  </button>
-                ))}
-              </div>
-
-              {/* Card Inputs */}
-              {method === 'card' && (
-                <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.3rem' }}>
-                      Cardholder Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Name on card"
-                      value={formData.cardName || formData.name}
-                      onChange={(e) => setFormData({ ...formData, cardName: e.target.value })}
-                      style={{ width: '100%', padding: '0.7rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.88rem' }}
-                    />
-                  </div>
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.3rem' }}>
-                      Card Number *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="4532 0000 0000 8912"
-                      value={formData.cardNumber}
-                      onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
-                      style={{ width: '100%', padding: '0.7rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.88rem' }}
-                    />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.3rem' }}>
-                        Expiry (MM/YY) *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="12/28"
-                        value={formData.cardExp}
-                        onChange={(e) => setFormData({ ...formData, cardExp: e.target.value })}
-                        style={{ width: '100%', padding: '0.7rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.88rem' }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.3rem' }}>
-                        CVV Code *
-                      </label>
-                      <input
-                        type="password"
-                        required
-                        maxLength="4"
-                        placeholder="•••"
-                        value={formData.cardCvv}
-                        onChange={(e) => setFormData({ ...formData, cardCvv: e.target.value })}
-                        style={{ width: '100%', padding: '0.7rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.88rem' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* UPI Inputs */}
-              {method === 'upi' && (
-                <div style={{ background: '#f0fdf4', padding: '1.25rem', borderRadius: '10px', border: '1px solid #bbf7d0', marginBottom: '1.5rem', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#166534', marginBottom: '0.75rem' }}>
-                    Scan QR Code or Enter VPA / UPI ID
-                  </div>
-                  <div style={{ background: '#ffffff', width: '120px', height: '120px', margin: '0 auto 1rem', padding: '8px', borderRadius: '8px', border: '1px solid #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {/* Simulated QR Code */}
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: '2.5rem' }}>📱</div>
-                      <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#0f2b5c' }}>ezycertify@upi</div>
-                    </div>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Enter UPI ID (e.g. mobile@upi, name@okicici)"
-                    value={formData.upiId}
-                    onChange={(e) => setFormData({ ...formData, upiId: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #86efac', fontSize: '0.88rem', textTransform: 'lowercase' }}
-                  />
-                </div>
-              )}
-
-              {/* NetBanking Selection */}
-              {method === 'netbanking' && (
-                <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '0.5rem' }}>
-                    Select Your Bank:
-                  </label>
-                  <select
-                    value={formData.bank}
-                    onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
-                  >
-                    <option value="HDFC Bank">HDFC Bank</option>
-                    <option value="ICICI Bank">ICICI Bank</option>
-                    <option value="State Bank of India">State Bank of India (SBI)</option>
-                    <option value="Axis Bank">Axis Bank</option>
-                    <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
-                    <option value="Other Corporate Banks">Other Corporate Banks</option>
-                  </select>
-                </div>
-              )}
-
-              {/* Razorpay Option */}
-              {method === 'razorpay' && (
-                <div style={{ background: '#eff6ff', padding: '1.25rem', borderRadius: '10px', border: '1px solid #bfdbfe', marginBottom: '1.5rem', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e40af', marginBottom: '0.5rem' }}>
-                    Razorpay Direct Gateway
-                  </div>
-                  <p style={{ fontSize: '0.82rem', color: '#3b82f6', margin: 0 }}>
-                    You will be securely redirected to Razorpay checkout portal for Cards, Netbanking, Wallets, & International payments.
-                  </p>
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  style={{
-                    padding: '0.85rem 1.25rem',
-                    borderRadius: '8px',
-                    background: '#e2e8f0',
-                    color: '#475569',
-                    fontWeight: 700,
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  ← Back
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    flex: 1,
-                    padding: '0.85rem',
-                    borderRadius: '8px',
-                    background: '#16a34a',
-                    color: '#ffffff',
-                    fontWeight: 800,
-                    fontSize: '1rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
-                  }}
-                >
-                  Pay {formatPrice(finalPrice, currency)} Now 🔒
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* Step 3: Payment Processing Animation */}
-          {step === 3 && (
-            <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-              <div style={{
-                width: '60px',
-                height: '60px',
-                border: '4px solid #cbd5e1',
-                borderTopColor: '#0074e4',
-                borderRadius: '50%',
-                margin: '0 auto 1.5rem',
-                animation: 'spin 1s linear infinite'
-              }} />
-              <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-                Processing Payment...
-              </h3>
-              <p style={{ fontSize: '0.88rem', color: '#64748b' }}>
-                Please do not refresh or close this window.<br />
-                Encrypting credentials via 256-bit SSL gateway.
-              </p>
+          {status === 'paying' && (
+            <div className="pay-center">
+              <div className="pay-spinner" />
+              <h3>Opening Razorpay Checkout…</h3>
+              <p>Complete the payment in the Razorpay window. Do not refresh this page.</p>
             </div>
           )}
 
-          {/* Step 4: Instant Success Receipt / Invoice */}
-          {step === 4 && (
-            <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                background: '#dcfce7',
-                color: '#16a34a',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '2rem',
-                margin: '0 auto 1rem'
-              }}>
-                ✓
-              </div>
+          {status === 'error' && (
+            <div className="pay-center">
+              <div className="pay-alert">{error}</div>
+              <button type="button" className="pay-cta" onClick={() => { setError(''); setStatus('form') }}>
+                Try again
+              </button>
+            </div>
+          )}
 
-              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#15803d', background: '#f0fdf4', padding: '0.25rem 0.75rem', borderRadius: '20px', border: '1px solid #bbf7d0' }}>
-                TRANSACTION SUCCESSFUL & ENROLLED
-              </span>
-
-              <h3 style={{ fontSize: '1.6rem', fontWeight: 850, color: '#0f172a', margin: '0.75rem 0 0.25rem' }}>
-                Welcome to Ezycertify!
-              </h3>
-              <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem' }}>
-                Payment of <strong>{formatPrice(finalPrice, currency)}</strong> confirmed. Your seat in <strong>{course?.shortTitle || 'Course'}</strong> is locked!
+          {status === 'success' && enrollment && (
+            <div className="pay-center">
+              <div className="pay-success-icon">✓</div>
+              <span className="pay-success-pill">Transaction successful & enrolled</span>
+              <h3>Welcome to Ezycertify!</h3>
+              <p>
+                Payment of <strong>{displayPrice}</strong> confirmed. Your seat in <strong>{course?.shortTitle}</strong> is locked.
               </p>
-
-              {/* Transaction Receipt Box */}
-              <div style={{
-                background: '#f8fafc',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                border: '1px solid #e2e8f0',
-                textAlign: 'left',
-                fontSize: '0.88rem',
-                color: '#334155',
-                marginBottom: '1.5rem',
-                lineHeight: 1.8
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.4rem', marginBottom: '0.4rem' }}>
-                  <span>Order Reference ID:</span>
-                  <strong style={{ color: '#0074e4' }}>{orderId}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.4rem', marginBottom: '0.4rem' }}>
-                  <span>Student Name:</span>
-                  <strong>{formData.name}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.4rem', marginBottom: '0.4rem' }}>
-                  <span>Student Email:</span>
-                  <strong>{formData.email}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Payment Date & Time:</span>
-                  <strong>{txnTime}</strong>
-                </div>
+              <div className="pay-receipt">
+                <div><span>Receipt ID</span><strong>{enrollment.id}</strong></div>
+                <div><span>Payment ID</span><strong>{enrollment.paymentId}</strong></div>
+                <div><span>Student</span><strong>{formData.name}</strong></div>
+                <div><span>Email</span><strong>{formData.email}</strong></div>
               </div>
-
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button
-                  onClick={handleDownloadInvoice}
-                  style={{
-                    flex: 1,
-                    padding: '0.85rem',
-                    borderRadius: '8px',
-                    background: '#0074e4',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: '0.92rem',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  📄 Download Fee Receipt
+              <div className="pay-actions">
+                <button type="button" className="pay-cta" onClick={handleDownloadReceipt}>
+                  Download fee receipt
                 </button>
-                <button
-                  onClick={onClose}
-                  style={{
-                    padding: '0.85rem 1.5rem',
-                    borderRadius: '8px',
-                    background: '#0f172a',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: '0.92rem',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
+                <button type="button" className="pay-done" onClick={onClose}>
                   Done
                 </button>
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>

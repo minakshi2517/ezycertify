@@ -34,17 +34,17 @@ export function CourseCard({ course, onEnroll }) {
       <div className="course-card-body">
         <h3 className="course-card-title">{tr(course.title) || course.shortTitle}</h3>
         <p className="course-card-desc">{course.description}</p>
-        <div className="course-card-meta" style={{ alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className="course-card-meta" style={{ alignItems: 'center' }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0074e4', display: 'inline-flex', alignItems: 'center', gap: '0.45rem', background: '#eff6ff', padding: '0.35rem 0.85rem', borderRadius: '20px', border: '1px solid #bfdbfe' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0074e4" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span>{course.duration || 'Live Virtual Cohort'}</span>
+          </span>
           <Link to={`/courses/${course.slug}`} className="btn btn-blue btn-sm">
             {t.courses?.viewDetails || 'View Details'}
           </Link>
-          <button
-            onClick={() => onEnroll && onEnroll(course)}
-            className="btn btn-red btn-sm"
-            style={{ fontWeight: 700 }}
-          >
-            Enroll & Pay 🔒
-          </button>
         </div>
       </div>
     </div>

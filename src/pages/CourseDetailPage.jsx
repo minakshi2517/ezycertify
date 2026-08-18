@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getCourseBySlug, formatPrice, PHONE_NUMBER, WHATSAPP_LINK } from '../data/siteData'
+import { getCourseBySlug, formatPrice, WHATSAPP_LINK } from '../data/siteData'
 import PaymentModal from '../components/PaymentModal'
 
 export default function CourseDetailPage() {
@@ -10,8 +10,7 @@ export default function CourseDetailPage() {
   const course = getCourseBySlug(slug)
 
   const [showModal, setShowModal] = useState(false)
-  const [enrolled, setEnrolled] = useState(false)
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', batch: '' })
+  const [selectedBatch, setSelectedBatch] = useState('')
 
   if (!course) {
     return (
@@ -25,16 +24,6 @@ export default function CourseDetailPage() {
         </div>
       </div>
     )
-  }
-
-  const handleEnrollSubmit = (e) => {
-    e.preventDefault()
-    setEnrolled(true)
-    setTimeout(() => {
-      setEnrolled(false)
-      setShowModal(false)
-      setFormData({ name: '', email: '', phone: '', batch: '' })
-    }, 2500)
   }
 
   const whatsappMsg = `Hi Ezycertify, I want to inquire about enrolling in ${course.title}. Please share batch details and fee structure.`
@@ -182,7 +171,7 @@ export default function CourseDetailPage() {
                       <button
                         className="btn btn-red btn-sm"
                         onClick={() => {
-                          setFormData((prev) => ({ ...prev, batch: `${batch.date} (${batch.time})` }))
+                          setSelectedBatch(`${batch.date} (${batch.time})`)
                           setShowModal(true)
                         }}
                       >
@@ -201,7 +190,7 @@ export default function CourseDetailPage() {
       {showModal && (
         <PaymentModal
           course={course}
-          batch={formData.batch}
+          batch={selectedBatch}
           onClose={() => setShowModal(false)}
         />
       )}

@@ -1186,3 +1186,7 @@ export function formatPrice(priceUSD, currencyCode = 'USD', symbol = '$') {
 export function getCourseBySlug(slug) {
   return courses.find((c) => c.slug === slug)
 }
+
+export function getCourseById(id) {
+  return courses.find((c) => c.id === id)
+}
