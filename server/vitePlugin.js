@@ -9,8 +9,13 @@ export default function paymentApiPlugin() {
       const env = loadEnv(server.config.mode, process.cwd(), '')
       Object.assign(process.env, env)
 
-      // Mount Express backend directly into Vite development server
-      server.middlewares.use(app)
+      // Forward only API requests to Express, letting Vite handle all JSX and assets
+      server.middlewares.use((req, res, next) => {
+        if (req.url && (req.url.startsWith('/api') || req.url.startsWith('/api/'))) {
+          return app(req, res, next)
+        }
+        next()
+      })
     },
   }
 }

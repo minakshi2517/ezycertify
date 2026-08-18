@@ -71,16 +71,18 @@ app.use('/api/admin', adminRoutes)
 app.use('/api', paymentRoutes)
 app.use('/api', courseRoutes)
 
-// Serve Static Frontend Assets
-app.use(express.static(distDir))
+// In production standalone mode, serve static assets and SPA catch-all
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(distDir))
 
-// SPA Catch-All
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api')) return next()
-  res.sendFile(path.join(distDir, 'index.html'), (err) => {
-    if (err) next()
+  // SPA Catch-All
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next()
+    res.sendFile(path.join(distDir, 'index.html'), (err) => {
+      if (err) next()
+    })
   })
-})
+}
 
 // Centralized Error Handler
 app.use((err, req, res, next) => {

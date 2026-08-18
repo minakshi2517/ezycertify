@@ -19,12 +19,21 @@ async function request(path, options = {}) {
   try {
     res = await fetch(apiUrl(path), config)
   } catch (networkErr) {
-    throw new Error('Unable to connect to the server. Please check your internet connection.')
+    console.error('[API Network Error]:', networkErr)
+    throw new Error('Unable to connect to the server. Please check your internet connection or start the backend server.')
   }
 
-  const data = await res.json().catch(() => ({}))
+  let data
+  try {
+    data = await res.json()
+  } catch (parseErr) {
+    const text = await res.text().catch(() => '')
+    console.error(`[API Non-JSON Response from ${path}]:`, res.status, text)
+    data = { error: text ? `Server Error (${res.status}): ${text.slice(0, 120)}` : `Server returned status ${res.status}` }
+  }
+
   if (!res.ok) {
-    throw new Error(data.error || 'Something went wrong. Please try again.')
+    throw new Error(data?.error || `Request failed with status ${res.status}`)
   }
   return data
 }
