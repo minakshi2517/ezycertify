@@ -1,4 +1,4 @@
-import { exchangeRates } from '../data/siteData'
+import { exchangeRates } from '../data/siteData.js'
 
 export function getPayable(priceUSD) {
   const rate = exchangeRates.INR || 83.5

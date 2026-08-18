@@ -12,6 +12,11 @@ import ContactPage from './pages/ContactPage'
 import VerifyCertPage from './pages/VerifyCertPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
+import MyCoursesPage from './pages/MyCoursesPage'
+import AdminDashboardPage from './pages/AdminDashboardPage'
 import PartnerPage from './pages/PartnerPage'
 import PrivacyPage from './pages/PrivacyPage'
 import TermsPage from './pages/TermsPage'
@@ -155,6 +160,46 @@ export default function App() {
         element={
           <Layout hideFooter>
             <SignupPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/verify-email"
+        element={
+          <Layout hideFooter>
+            <VerifyEmailPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <Layout hideFooter>
+            <ForgotPasswordPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <Layout hideFooter>
+            <ResetPasswordPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/my-courses"
+        element={
+          <Layout>
+            <MyCoursesPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <Layout>
+            <AdminDashboardPage />
           </Layout>
         }
       />

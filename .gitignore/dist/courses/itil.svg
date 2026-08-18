@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="100%" height="100%">
-  <rect width="600" height="360" fill="#1e293b" rx="16" />
-  <circle cx="100" cy="280" r="140" fill="rgba(0,116,228,0.3)" />
-  <rect x="50" y="50" width="170" height="36" rx="18" fill="#0074e4" />
-  <text x="135" y="73" font-family="'Outfit', sans-serif" font-weight="800" font-size="14" fill="#ffffff" text-anchor="middle">PEOPLECERT</text>
-  <text x="50" y="145" font-family="'Outfit', sans-serif" font-weight="900" font-size="38" fill="#ffffff">ITIL® 4 Foundation</text>
-  <text x="50" y="185" font-family="'Poppins', sans-serif" font-weight="600" font-size="20" fill="#60a5fa">IT Service Management</text>
-</svg>

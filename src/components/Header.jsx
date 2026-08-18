@@ -285,16 +285,29 @@ export default function Header() {
             </div>
 
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--navy)' }}>Hi, {user.name}</span>
-                <button className="btn btn-outline-navy btn-sm" onClick={signOut}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <Link to="/my-courses" className="btn btn-outline-navy btn-sm" style={{ padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}>
+                  🎓 My Courses
+                </Link>
+                {user.role === 'admin' && (
+                  <Link to="/admin" className="btn btn-red btn-sm" style={{ padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}>
+                    ⚙️ Admin
+                  </Link>
+                )}
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--navy)' }}>{user.name.split(' ')[0]}</span>
+                <button className="btn btn-outline-navy btn-sm" onClick={signOut} style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>
                   Sign Out
                 </button>
               </div>
             ) : (
-              <Link to="/login" className="nav-login-btn">
-                {t.nav?.signIn || 'Login'}
-              </Link>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Link to="/login" className="nav-login-btn">
+                  {t.nav?.signIn || 'Login'}
+                </Link>
+                <Link to="/signup" className="btn btn-blue btn-sm" style={{ padding: '0.45rem 0.9rem', fontSize: '0.84rem' }}>
+                  Sign Up
+                </Link>
+              </div>
             )}
 
             <button
@@ -374,6 +387,16 @@ export default function Header() {
           <Link to="/courses" onClick={() => setMobileOpen(false)} style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy)' }}>
             {t.nav?.courses || 'All Courses Catalog'}
           </Link>
+          {user && (
+            <Link to="/my-courses" onClick={() => setMobileOpen(false)} style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0074e4' }}>
+              🎓 My Enrolled Courses
+            </Link>
+          )}
+          {user?.role === 'admin' && (
+            <Link to="/admin" onClick={() => setMobileOpen(false)} style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ef4444' }}>
+              ⚙️ Admin Portal
+            </Link>
+          )}
           <Link to="/career" onClick={() => setMobileOpen(false)} style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy)' }}>
             {t.nav?.career || 'Career Opportunities'}
           </Link>
@@ -391,9 +414,14 @@ export default function Header() {
               Sign Out ({user.name})
             </button>
           ) : (
-            <Link to="/login" className="nav-login-btn" style={{ width: '100%', padding: '0.75rem' }} onClick={() => setMobileOpen(false)}>
-              {t.nav?.signIn || 'Login to Portal'}
-            </Link>
+            <>
+              <Link to="/login" className="nav-login-btn" style={{ width: '100%', padding: '0.75rem', textAlign: 'center' }} onClick={() => setMobileOpen(false)}>
+                {t.nav?.signIn || 'Login to Portal'}
+              </Link>
+              <Link to="/signup" className="btn btn-blue" style={{ width: '100%', padding: '0.75rem', textAlign: 'center' }} onClick={() => setMobileOpen(false)}>
+                Create Free Account
+              </Link>
+            </>
           )}
         </div>
       </div>

@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 48" role="img" aria-label="Scrum Alliance">
-  <circle cx="24" cy="24" r="16" fill="#006B5E"/>
-  <path d="M18 24a6 6 0 0112 0 6 6 0 01-12 0" fill="none" stroke="#fff" stroke-width="2.5"/>
-  <path d="M24 14v4M24 30v4M14 24h4M30 24h4" stroke="#A8D08D" stroke-width="2" stroke-linecap="round"/>
-  <text x="48" y="22" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="800" fill="#006B5E">SCRUM</text>
-  <text x="48" y="36" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="600" fill="#4A9B8C">ALLIANCE</text>
-</svg>

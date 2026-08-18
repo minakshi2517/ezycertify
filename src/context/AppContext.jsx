@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
 import { languages } from '../data/siteData'
 import { getTranslation, translateText } from '../data/translations'
+import { api } from '../lib/api'
 
 const AppContext = createContext(null)
 
@@ -9,10 +10,8 @@ export function AppProvider({ children }) {
     return localStorage.getItem('ezycertify-lang') || 'en-US'
   })
 
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('ezycertify-user')
-    return saved ? JSON.parse(saved) : null
-  })
+  const [user, setUser] = useState(null)
+  const [loadingAuth, setLoadingAuth] = useState(true)
 
   const langConfig = useMemo(
     () => languages.find((l) => l.code === language) || languages[0],
@@ -58,23 +57,35 @@ export function AppProvider({ children }) {
     }
   }, [triggerGoogleTranslate])
 
-  const signIn = useCallback((email, password) => {
-    const mockUser = { email, name: email.split('@')[0] }
-    setUser(mockUser)
-    localStorage.setItem('ezycertify-user', JSON.stringify(mockUser))
-    return true
+  // Check current session from backend via HTTP-only cookie
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await api.auth.me()
+      if (res.success && res.user) {
+        setUser(res.user)
+      } else {
+        setUser(null)
+      }
+    } catch {
+      setUser(null)
+    } finally {
+      setLoadingAuth(false)
+    }
   }, [])
 
-  const signUp = useCallback((name, email, password) => {
-    const mockUser = { email, name }
-    setUser(mockUser)
-    localStorage.setItem('ezycertify-user', JSON.stringify(mockUser))
-    return true
-  }, [])
+  useEffect(() => {
+    refreshUser()
+  }, [refreshUser])
 
-  const signOut = useCallback(() => {
-    setUser(null)
-    localStorage.removeItem('ezycertify-user')
+  const signOut = useCallback(async () => {
+    try {
+      await api.auth.logout()
+    } catch (err) {
+      console.error('Sign out error:', err)
+    } finally {
+      setUser(null)
+      window.location.href = '/'
+    }
   }, [])
 
   const value = {
@@ -87,8 +98,9 @@ export function AppProvider({ children }) {
     t,
     tr,
     user,
-    signIn,
-    signUp,
+    setUser,
+    loadingAuth,
+    refreshUser,
     signOut,
   }
 

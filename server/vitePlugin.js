@@ -1,34 +1,16 @@
 import { loadEnv } from 'vite'
-import { handlePaymentRequest } from './payment.js'
+import app from './index.js'
 
 export default function paymentApiPlugin() {
   return {
-    name: 'ezycertify-payment-api',
+    name: 'ezycertify-api-plugin',
     configureServer(server) {
-      const env = {
-        ...process.env,
-        ...loadEnv(server.config.mode, process.cwd(), ''),
-      }
+      // Load environment variables into process.env
+      const env = loadEnv(server.config.mode, process.cwd(), '')
+      Object.assign(process.env, env)
 
-      server.middlewares.use(async (req, res, next) => {
-        const url = String(req.url || '').split('?')[0]
-        if (!url.startsWith('/api')) {
-          next()
-          return
-        }
-
-        try {
-          const handled = await handlePaymentRequest(req, res, env)
-          if (!handled) next()
-        } catch (err) {
-          console.error('Payment API error:', err)
-          if (!res.headersSent) {
-            res.statusCode = 500
-            res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ error: 'Payment API failed.' }))
-          }
-        }
-      })
+      // Mount Express backend directly into Vite development server
+      server.middlewares.use(app)
     },
   }
 }

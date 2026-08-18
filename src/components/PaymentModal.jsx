@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { formatPrice } from '../data/siteData'
-import { loadRazorpay, postJson } from '../lib/razorpayClient'
+import { loadRazorpay } from '../lib/razorpayClient'
+import { api } from '../lib/api'
 
 const inputStyle = {
   width: '100%',
@@ -28,7 +29,7 @@ export default function PaymentModal({ course, batch, onClose }) {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: '',
+    phone: user?.phone || '',
     city: '',
   })
   const [status, setStatus] = useState('form') // form | paying | success | error
@@ -46,7 +47,7 @@ export default function PaymentModal({ course, batch, onClose }) {
     setStatus('paying')
 
     try {
-      const order = await postJson('/api/create-order', {
+      const order = await api.payments.createOrder({
         courseId: course.id,
         currency,
         batch: batch || '',
@@ -66,7 +67,7 @@ export default function PaymentModal({ course, batch, onClose }) {
         prefill: {
           name: formData.name,
           email: formData.email,
-          contact: formData.phone.replace(/\s/g, ''),
+          contact: formData.phone.replace(/[\s\-()]/g, ''),
         },
         notes: {
           courseId: course.id,
@@ -83,7 +84,7 @@ export default function PaymentModal({ course, batch, onClose }) {
         handler: async (response) => {
           completed = true
           try {
-            const result = await postJson('/api/verify-payment', {
+            const result = await api.payments.verifyPayment({
               ...response,
               courseId: course.id,
               currency,
@@ -93,26 +94,30 @@ export default function PaymentModal({ course, batch, onClose }) {
             setEnrollment(result.enrollment)
             setStatus('success')
           } catch (verifyErr) {
-            setError(verifyErr.message)
+            setError(verifyErr.message || 'Payment signature verification failed.')
             setStatus('error')
           }
         },
       })
 
       rzp.on('payment.failed', (resp) => {
-        setError(resp?.error?.description || 'Payment failed. Please try another method.')
+        setError(resp?.error?.description || 'Payment failed on gateway. Please try another payment method.')
         setStatus('error')
       })
 
       rzp.open()
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Could not initiate checkout. Please try again.')
       setStatus('error')
     }
   }
 
   const handleDownloadReceipt = () => {
-    const paidAt = enrollment?.paidAt ? new Date(enrollment.paidAt).toLocaleString() : new Date().toLocaleString()
+    const rawDate = enrollment?.purchased_at || enrollment?.paidAt || new Date().toISOString()
+    const paidAt = new Date(rawDate).toLocaleString()
+    const paymentId = enrollment?.payment_id || enrollment?.paymentId || 'RZP-VERIFIED'
+    const orderId = enrollment?.order_id || enrollment?.orderId || 'RZP-ORDER'
+
     const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -128,12 +133,12 @@ export default function PaymentModal({ course, batch, onClose }) {
 </head>
 <body>
   <h1>Ezycertify</h1>
-  <p class="muted">Official Fee Receipt</p>
-  <p class="ok">PAYMENT SUCCESSFUL</p>
+  <p class="muted">Official Fee Receipt & Student Enrollment Voucher</p>
+  <p class="ok">PAYMENT SUCCESSFUL & ENROLLED</p>
   <table>
     <tr><td>Receipt ID</td><td><strong>${safeHtml(enrollment?.id)}</strong></td></tr>
-    <tr><td>Payment ID</td><td>${safeHtml(enrollment?.paymentId)}</td></tr>
-    <tr><td>Order ID</td><td>${safeHtml(enrollment?.orderId)}</td></tr>
+    <tr><td>Payment ID</td><td>${safeHtml(paymentId)}</td></tr>
+    <tr><td>Order ID</td><td>${safeHtml(orderId)}</td></tr>
     <tr><td>Course</td><td>${safeHtml(course?.title)}</td></tr>
     <tr><td>Batch</td><td>${safeHtml(batch || 'Upcoming Live Virtual Cohort')}</td></tr>
     <tr><td>Student</td><td>${safeHtml(formData.name)}</td></tr>
@@ -275,7 +280,7 @@ export default function PaymentModal({ course, batch, onClose }) {
               </p>
               <div className="pay-receipt">
                 <div><span>Receipt ID</span><strong>{enrollment.id}</strong></div>
-                <div><span>Payment ID</span><strong>{enrollment.paymentId}</strong></div>
+                <div><span>Payment ID</span><strong>{enrollment.payment_id || enrollment.paymentId || 'RZP-VERIFIED'}</strong></div>
                 <div><span>Student</span><strong>{formData.name}</strong></div>
                 <div><span>Email</span><strong>{formData.email}</strong></div>
               </div>
