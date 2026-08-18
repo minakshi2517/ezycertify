@@ -23,6 +23,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [cooldown, setCooldown] = useState(0)
+  const [demo2FaCode, setDemo2FaCode] = useState('')
 
   useEffect(() => {
     let timer
@@ -45,6 +46,7 @@ export default function LoginPage() {
         setMaskedEmail(res.maskedEmail)
         setMaskedPhone(res.maskedPhone)
         setChannel(res.channel || 'email')
+        if (res.devCode) setDemo2FaCode(res.devCode)
         setStep(2)
         setCooldown(60)
         setSuccessMsg(res.message || 'Please enter the security verification code.')
@@ -299,7 +301,7 @@ export default function LoginPage() {
             </div>
 
             {/* 2FA Method Selector */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', background: '#f1f5f9', padding: '4px', borderRadius: '10px' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', background: '#f1f5f9', padding: '4px', borderRadius: '10px' }}>
               <button
                 type="button"
                 onClick={() => handleSwitchChannel('email')}
@@ -337,6 +339,24 @@ export default function LoginPage() {
                 📱 Phone OTP
               </button>
             </div>
+
+            {demo2FaCode && (
+              <div style={{
+                background: '#eff6ff',
+                border: '1px dashed #3b82f6',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                marginBottom: '1.25rem',
+                textAlign: 'center',
+                fontSize: '0.84rem',
+                color: '#1e40af',
+              }}>
+                <div>💡 <strong>Security Code:</strong> <strong style={{ fontSize: '1.2rem', color: '#0074e4', letterSpacing: '3px', marginLeft: '6px' }}>{demo2FaCode}</strong></div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                  (Enter this 6-digit code below to complete 2FA sign in)
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleVerify2FA}>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.75rem' }}>

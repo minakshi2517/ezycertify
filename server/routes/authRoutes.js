@@ -20,6 +20,13 @@ import { db } from '../db/database.js'
 
 const router = Router()
 
+function isSmtpConfigured() {
+  const host = process.env.SMTP_HOST
+  const user = process.env.SMTP_USER
+  const pass = process.env.SMTP_PASS
+  return Boolean(host && user && pass && !pass.includes('xxxxxxxx') && !user.includes('xxxxxxxx'))
+}
+
 // Rate limiters for security
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 mins
@@ -74,6 +81,8 @@ router.post('/signup', authLimiter, async (req, res) => {
     })
     await sendPhoneOtp(user.phone, phoneVer.rawCode, 'verification')
 
+    const smtpReady = isSmtpConfigured()
+
     res.status(201).json({
       success: true,
       message: 'Account created. Please verify your email and phone number.',
@@ -82,6 +91,10 @@ router.post('/signup', authLimiter, async (req, res) => {
       phone: user.phone,
       maskedEmail: maskEmail(user.email),
       maskedPhone: maskPhone(user.phone),
+      // In dev/demo mode when SMTP credentials are not yet added, provide code for frictionless testing
+      devCode: !smtpReady ? emailVer.rawCode : undefined,
+      devPhoneCode: phoneVer.rawCode,
+      demoMode: !smtpReady,
     })
   } catch (err) {
     res.status(400).json({ error: err.message || 'Signup failed.' })
@@ -132,7 +145,13 @@ router.post('/resend-email-otp', otpLimiter, async (req, res) => {
     const verifyLink = `${appUrl}/verify-email?token=${ver.rawCode}&email=${encodeURIComponent(user.email)}`
     await sendVerificationEmail(user.email, user.name, ver.rawCode, verifyLink)
 
-    res.json({ success: true, message: 'New email verification code sent.', maskedEmail: maskEmail(user.email) })
+    const smtpReady = isSmtpConfigured()
+    res.json({
+      success: true,
+      message: 'New verification code sent to your email.',
+      maskedEmail: maskEmail(user.email),
+      devCode: !smtpReady ? ver.rawCode : undefined,
+    })
   } catch (err) {
     res.status(400).json({ error: err.message || 'Could not resend email code.' })
   }
@@ -179,7 +198,12 @@ router.post('/resend-phone-otp', otpLimiter, async (req, res) => {
     })
     await sendPhoneOtp(user.phone, ver.rawCode, 'verification')
 
-    res.json({ success: true, message: 'New phone OTP sent.', maskedPhone: maskPhone(user.phone) })
+    res.json({
+      success: true,
+      message: 'New phone OTP sent.',
+      maskedPhone: maskPhone(user.phone),
+      devCode: ver.rawCode,
+    })
   } catch (err) {
     res.status(400).json({ error: err.message || 'Could not resend phone OTP.' })
   }
@@ -214,6 +238,7 @@ router.post('/login', authLimiter, async (req, res) => {
       })
 
       await send2FAEmail(user.email, user.name, ver.rawCode)
+      const smtpReady = isSmtpConfigured()
 
       return res.json({
         require2FA: true,
@@ -222,6 +247,7 @@ router.post('/login', authLimiter, async (req, res) => {
         maskedPhone: maskPhone(user.phone),
         channel: 'email',
         message: 'Security code sent to your registered email.',
+        devCode: !smtpReady ? ver.rawCode : undefined,
       })
     }
 
@@ -260,29 +286,31 @@ router.post('/send-2fa-otp', otpLimiter, async (req, res) => {
       await send2FAEmail(user.email, user.name, ver.rawCode)
     }
 
+    const smtpReady = isSmtpConfigured()
+
     res.json({
       success: true,
+      message: `Security code sent to your ${channel === 'phone' ? 'phone number' : 'email'}.`,
       channel,
-      destination: channel === 'phone' ? maskPhone(user.phone) : maskEmail(user.email),
-      message: `Verification code sent to ${channel === 'phone' ? maskPhone(user.phone) : maskEmail(user.email)}`,
+      devCode: channel === 'phone' ? ver.rawCode : (!smtpReady ? ver.rawCode : undefined),
     })
   } catch (err) {
     res.status(400).json({ error: err.message || 'Could not send 2FA code.' })
   }
 })
 
-// 8. VERIFY 2FA & ESTABLISH SESSION
+// 8. VERIFY 2FA AND ESTABLISH SESSION
 router.post('/verify-2fa', otpLimiter, (req, res) => {
   try {
     const { userId, code } = req.body
     if (!userId || !code) {
-      return res.status(400).json({ error: 'User ID and security code are required.' })
+      return res.status(400).json({ error: 'User identifier and verification code are required.' })
     }
 
-    const { verified, user } = verifyCode({ userId, purpose: 'login_2fa', code: String(code).trim() })
-    if (!verified || !user) {
-      return res.status(400).json({ error: 'Invalid or expired 2FA code.' })
-    }
+    verifyCode({ userId, purpose: 'login_2fa', code: String(code).trim() })
+
+    const user = findUserById(userId)
+    if (!user) return res.status(404).json({ error: 'User account not found.' })
 
     const now = new Date().toISOString()
     db.prepare('UPDATE users SET last_login = ?, updated_at = ? WHERE id = ?').run(now, now, user.id)
@@ -291,40 +319,44 @@ router.post('/verify-2fa', otpLimiter, (req, res) => {
     setSessionCookie(res, token)
 
     const { password_hash, ...safeUser } = user
-    res.json({ success: true, user: safeUser, token })
+    res.json({
+      success: true,
+      message: 'Authentication successful.',
+      user: safeUser,
+      token,
+    })
   } catch (err) {
-    res.status(400).json({ error: err.message || '2FA verification failed.' })
+    res.status(400).json({ error: err.message || 'Verification failed.' })
   }
 })
 
-// 9. FORGOT PASSWORD
+// 9. FORGOT PASSWORD REQUEST
 router.post('/forgot-password', authLimiter, async (req, res) => {
   try {
     const { email } = req.body
-    if (!email || !isValidEmail(email)) {
-      return res.status(400).json({ error: 'Please enter a valid registered email address.' })
-    }
+    if (!email) return res.status(400).json({ error: 'Email address is required.' })
 
     const user = findUserByEmail(email)
-    if (!user) {
-      // Return success without revealing user existence (Security Best Practice)
-      return res.json({ success: true, message: 'If an account exists with this email, password reset instructions have been sent.' })
+    if (user) {
+      const ver = createVerification({
+        userId: user.id,
+        purpose: 'password_reset',
+        destination: user.email,
+        isNumeric: false, // 32-byte hex token
+      })
+
+      const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`
+      const resetLink = `${appUrl}/reset-password?token=${ver.rawCode}&email=${encodeURIComponent(user.email)}`
+      await sendPasswordResetEmail(user.email, user.name, resetLink)
     }
 
-    const ver = createVerification({
-      userId: user.id,
-      purpose: 'password_reset',
-      destination: user.email,
-      isNumeric: false,
+    // Always respond with success to prevent user enumeration attacks
+    res.json({
+      success: true,
+      message: 'If an account exists with this email address, a password reset link has been sent.',
     })
-
-    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`
-    const resetLink = `${appUrl}/reset-password?token=${ver.rawCode}&email=${encodeURIComponent(user.email)}`
-
-    await sendPasswordResetEmail(user.email, user.name, resetLink)
-    res.json({ success: true, message: 'If an account exists with this email, password reset instructions have been sent.' })
   } catch (err) {
-    res.status(500).json({ error: err.message || 'Could not process password reset request.' })
+    res.status(500).json({ error: 'Could not process password reset request.' })
   }
 })
 

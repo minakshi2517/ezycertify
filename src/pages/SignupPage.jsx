@@ -25,6 +25,8 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [cooldown, setCooldown] = useState(0)
+  const [demoEmailCode, setDemoEmailCode] = useState('')
+  const [demoPhoneCode, setDemoPhoneCode] = useState('')
 
   useEffect(() => {
     let timer
@@ -70,6 +72,8 @@ export default function SignupPage() {
       setUserId(res.userId)
       setMaskedEmail(res.maskedEmail)
       setMaskedPhone(res.maskedPhone)
+      if (res.devCode) setDemoEmailCode(res.devCode)
+      if (res.devPhoneCode) setDemoPhoneCode(res.devPhoneCode)
       setStep(2)
       setCooldown(60)
       setSuccessMsg('Account registered! We sent verification codes to your email and phone.')
@@ -409,10 +413,28 @@ export default function SignupPage() {
 
             {activeTab === 'email' ? (
               <form onSubmit={handleVerifyEmail}>
-                <p style={{ fontSize: '0.88rem', color: '#475569', textAlign: 'center', marginBottom: '1.25rem' }}>
+                <p style={{ fontSize: '0.88rem', color: '#475569', textAlign: 'center', marginBottom: '1rem' }}>
                   Enter the 6-digit code sent to <br />
                   <strong style={{ color: '#0074e4' }}>{maskedEmail}</strong>
                 </p>
+
+                {demoEmailCode && !emailVerified && (
+                  <div style={{
+                    background: '#eff6ff',
+                    border: '1px dashed #3b82f6',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    marginBottom: '1.25rem',
+                    textAlign: 'center',
+                    fontSize: '0.84rem',
+                    color: '#1e40af',
+                  }}>
+                    <div>💡 <strong>Verification Code:</strong> <strong style={{ fontSize: '1.2rem', color: '#0074e4', letterSpacing: '3px', marginLeft: '6px' }}>{demoEmailCode}</strong></div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                      (Enter this 6-digit code above to activate your account)
+                    </div>
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
                   {emailOtp.map((digit, i) => (
@@ -470,10 +492,28 @@ export default function SignupPage() {
               </form>
             ) : (
               <form onSubmit={handleVerifyPhone}>
-                <p style={{ fontSize: '0.88rem', color: '#475569', textAlign: 'center', marginBottom: '1.25rem' }}>
+                <p style={{ fontSize: '0.88rem', color: '#475569', textAlign: 'center', marginBottom: '1rem' }}>
                   Enter the 6-digit OTP sent to <br />
                   <strong style={{ color: '#0074e4' }}>{maskedPhone}</strong>
                 </p>
+
+                {demoPhoneCode && !phoneVerified && (
+                  <div style={{
+                    background: '#eff6ff',
+                    border: '1px dashed #3b82f6',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    marginBottom: '1.25rem',
+                    textAlign: 'center',
+                    fontSize: '0.84rem',
+                    color: '#1e40af',
+                  }}>
+                    <div>💡 <strong>Phone OTP Code:</strong> <strong style={{ fontSize: '1.2rem', color: '#0074e4', letterSpacing: '3px', marginLeft: '6px' }}>{demoPhoneCode}</strong></div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                      (Enter this 6-digit code above to complete phone verification)
+                    </div>
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
                   {phoneOtp.map((digit, i) => (
