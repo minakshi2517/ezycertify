@@ -15,7 +15,7 @@ import {
 } from '../services/authService.js'
 import { sendVerificationEmail, send2FAEmail, sendPasswordResetEmail } from '../services/emailService.js'
 import { sendPhoneOtp } from '../services/smsService.js'
-import { generateSessionToken, setSessionCookie, clearSessionCookie, authMiddleware } from '../services/sessionService.js'
+import { generateSessionToken, setSessionCookie, clearSessionCookie, authMiddleware, optionalAuthMiddleware } from '../services/sessionService.js'
 import { db } from '../db/database.js'
 
 const router = Router()
@@ -358,8 +358,8 @@ router.post('/reset-password', authLimiter, (req, res) => {
 })
 
 // 11. CURRENT USER (/api/auth/me)
-router.get('/me', authMiddleware, (req, res) => {
-  res.json({ success: true, user: req.user })
+router.get('/me', optionalAuthMiddleware, (req, res) => {
+  res.json({ success: true, user: req.user || null })
 })
 
 // 12. LOGOUT
