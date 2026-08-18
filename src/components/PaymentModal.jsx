@@ -11,6 +11,16 @@ const inputStyle = {
   fontSize: '0.9rem',
 }
 
+// Sanitize user input before injecting into HTML strings (prevents XSS in receipt)
+function safeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 export default function PaymentModal({ course, batch, onClose }) {
   const { currency, user } = useApp()
   const displayPrice = formatPrice(course?.priceUSD, 'INR', '₹')
@@ -121,16 +131,16 @@ export default function PaymentModal({ course, batch, onClose }) {
   <p class="muted">Official Fee Receipt</p>
   <p class="ok">PAYMENT SUCCESSFUL</p>
   <table>
-    <tr><td>Receipt ID</td><td><strong>${enrollment?.id || ''}</strong></td></tr>
-    <tr><td>Payment ID</td><td>${enrollment?.paymentId || ''}</td></tr>
-    <tr><td>Order ID</td><td>${enrollment?.orderId || ''}</td></tr>
-    <tr><td>Course</td><td>${course?.title || ''}</td></tr>
-    <tr><td>Batch</td><td>${batch || 'Upcoming Live Virtual Cohort'}</td></tr>
-    <tr><td>Student</td><td>${formData.name}</td></tr>
-    <tr><td>Email</td><td>${formData.email}</td></tr>
-    <tr><td>Phone</td><td>${formData.phone}</td></tr>
-    <tr><td>Amount Paid</td><td><strong>${displayPrice}</strong></td></tr>
-    <tr><td>Date</td><td>${paidAt}</td></tr>
+    <tr><td>Receipt ID</td><td><strong>${safeHtml(enrollment?.id)}</strong></td></tr>
+    <tr><td>Payment ID</td><td>${safeHtml(enrollment?.paymentId)}</td></tr>
+    <tr><td>Order ID</td><td>${safeHtml(enrollment?.orderId)}</td></tr>
+    <tr><td>Course</td><td>${safeHtml(course?.title)}</td></tr>
+    <tr><td>Batch</td><td>${safeHtml(batch || 'Upcoming Live Virtual Cohort')}</td></tr>
+    <tr><td>Student</td><td>${safeHtml(formData.name)}</td></tr>
+    <tr><td>Email</td><td>${safeHtml(formData.email)}</td></tr>
+    <tr><td>Phone</td><td>${safeHtml(formData.phone)}</td></tr>
+    <tr><td>Amount Paid</td><td><strong>${safeHtml(displayPrice)}</strong></td></tr>
+    <tr><td>Date</td><td>${safeHtml(paidAt)}</td></tr>
   </table>
   <p class="muted" style="margin-top:24px">Processed securely via Razorpay. Ezycertify does not store card or UPI credentials.</p>
   <script>window.onload = function () { window.print(); }</script>
@@ -181,6 +191,7 @@ export default function PaymentModal({ course, batch, onClose }) {
                     id="pay-name"
                     type="text"
                     required
+                    maxLength={100}
                     placeholder="e.g. Rahul Sharma"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -193,6 +204,7 @@ export default function PaymentModal({ course, batch, onClose }) {
                     id="pay-email"
                     type="email"
                     required
+                    maxLength={150}
                     placeholder="rahul@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -205,6 +217,7 @@ export default function PaymentModal({ course, batch, onClose }) {
                     id="pay-phone"
                     type="tel"
                     required
+                    maxLength={20}
                     placeholder="+91 98765 43210"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -216,6 +229,7 @@ export default function PaymentModal({ course, batch, onClose }) {
                   <input
                     id="pay-city"
                     type="text"
+                    maxLength={80}
                     placeholder="e.g. Pune, India"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}

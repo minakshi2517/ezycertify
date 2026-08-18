@@ -97,7 +97,7 @@ export async function handlePaymentRequest(req, res, env = process.env) {
       const keys = getKeys(env)
       if (!keys) {
         sendJson(res, 503, {
-          error: 'Razorpay keys missing. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env, then restart the server.',
+          error: 'Payment service is temporarily unavailable. Please contact support.',
         })
         return true
       }
