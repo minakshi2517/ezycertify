@@ -8,13 +8,18 @@ function getTransporter() {
   const user = process.env.SMTP_USER
   const pass = process.env.SMTP_PASS
 
-  if (host && user && pass) {
-    transporter = nodemailer.createTransport({
-      host,
-      port: Number(process.env.SMTP_PORT || 587),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: { user, pass },
-    })
+  if (host && user && pass && !pass.includes('xxxxxxxx') && !user.includes('xxxxxxxx')) {
+    try {
+      transporter = nodemailer.createTransport({
+        host,
+        port: Number(process.env.SMTP_PORT || 587),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: { user, pass },
+      })
+    } catch (e) {
+      console.warn('[Email Transporter Init Error]:', e.message)
+      transporter = null
+    }
   }
   return transporter
 }
@@ -30,7 +35,10 @@ export async function sendEmail({ to, subject, html, text, logHeader = 'EMAIL' }
       return { success: true, messageId: info.messageId }
     } catch (err) {
       console.error(`[Email Error] Failed sending to ${to}:`, err.message)
-      throw new Error(`Email delivery failed: ${err.message}`)
+      if (process.env.NODE_ENV === 'production' && !process.env.SMTP_PASS?.includes('xxxxxxxx')) {
+        throw new Error(`Email delivery failed: ${err.message}`)
+      }
+      console.log(`[Email Dev Fallback] Falling back to console logger...`)
     }
   }
 
