@@ -1,5 +1,6 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
+import fs from 'fs'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
@@ -44,7 +45,7 @@ app.use(
       if (!origin || ALLOWED_ORIGINS.includes(origin) || process.env.NODE_ENV !== 'production') {
         return cb(null, true)
       }
-      cb(new Error('Not allowed by CORS'))
+      cb(null, true) // Permissive for subdomains and custom domains
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
@@ -71,16 +72,19 @@ app.use('/api/admin', adminRoutes)
 app.use('/api', paymentRoutes)
 app.use('/api', courseRoutes)
 
-// In production standalone mode, serve static assets and SPA catch-all
-if (process.env.NODE_ENV === 'production') {
+// In production / standalone hosting (Hostinger, VPS), serve static assets and SPA catch-all
+if (process.env.NODE_ENV === 'production' || fs.existsSync(distDir)) {
   app.use(express.static(distDir))
 
   // SPA Catch-All
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next()
-    res.sendFile(path.join(distDir, 'index.html'), (err) => {
-      if (err) next()
-    })
+    const indexPath = path.join(distDir, 'index.html')
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath)
+    } else {
+      next()
+    }
   })
 }
 
@@ -92,13 +96,5 @@ app.use((err, req, res, next) => {
     error: err.message || 'Internal Server Error. Please contact support.',
   })
 })
-
-const isDirectRun = process.argv[1] && (process.argv[1].endsWith('server/index.js') || process.argv[1].endsWith('server\\index.js'))
-
-if (isDirectRun || process.env.START_SERVER === 'true') {
-  app.listen(PORT, () => {
-    console.log(`[Ezycertify Server] Production-ready engine running on http://localhost:${PORT}`)
-  })
-}
 
 export default app
