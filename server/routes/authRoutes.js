@@ -1,65 +1,84 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
-import rateLimit from 'express-rate-limit'
+import { db } from '../db/database.js'
 import {
-  createUser,
-  findUserByEmail,
-  findUserById,
   findUserByIdentifier,
+  findUserById,
+  findUserByEmail,
+  isStrongPassword,
   createVerification,
   verifyCode,
   maskEmail,
-  maskPhone,
-  isValidEmail,
-  isStrongPassword,
 } from '../services/authService.js'
-import { sendVerificationEmail, send2FAEmail, sendPasswordResetEmail } from '../services/emailService.js'
-import { sendPhoneOtp } from '../services/smsService.js'
-import { generateSessionToken, setSessionCookie, clearSessionCookie, authMiddleware, optionalAuthMiddleware } from '../services/sessionService.js'
-import { db } from '../db/database.js'
+import {
+  generateSessionToken,
+  setSessionCookie,
+  clearSessionCookie,
+  optionalAuthMiddleware,
+} from '../services/sessionService.js'
+import {
+  sendVerificationEmail,
+  send2FAEmail,
+  sendPasswordResetEmail,
+} from '../services/emailService.js'
+import rateLimit from 'express-rate-limit'
 
 const router = Router()
 
-function isSmtpConfigured() {
-  const host = process.env.SMTP_HOST
-  const user = process.env.SMTP_USER
-  const pass = process.env.SMTP_PASS
-  return Boolean(host && user && pass && !pass.includes('xxxxxxxx') && !user.includes('xxxxxxxx'))
-}
-
-// Rate limiters for security
+// Rate limiters for brute-force prevention
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 mins
-  max: 30, // 30 attempts per IP
-  message: { error: 'Too many authentication attempts. Please try again later.' },
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { error: 'Too many authentication attempts. Please try again in 15 minutes.' },
   standardHeaders: true,
   legacyHeaders: false,
 })
 
 const otpLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 mins
-  max: 15,
-  message: { error: 'Too many OTP requests. Please try again in a few minutes.' },
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Too many OTP verification attempts. Please wait 15 minutes.' },
   standardHeaders: true,
   legacyHeaders: false,
 })
 
-// 1. SIGNUP
+function isSmtpConfigured() {
+  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS
+  return Boolean(pass && !pass.includes('xxxxxxxx') && !pass.includes('your_'))
+}
+
+// 1. SIGNUP (Email-based)
 router.post('/signup', authLimiter, async (req, res) => {
   try {
-    const { name, email, phone, password, confirmPassword } = req.body
-
-    if (!name || !email || !phone || !password) {
-      return res.status(400).json({ error: 'All fields are required.' })
+    const { name, email, phone, password } = req.body
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Full name, email, and password are required.' })
     }
 
-    if (confirmPassword !== undefined && password !== confirmPassword) {
-      return res.status(400).json({ error: 'Passwords do not match.' })
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters long and include an uppercase letter, lowercase letter, a number, and a special character.',
+      })
     }
 
-    const user = createUser({ name, email, phone, password })
+    const existingUser = findUserByEmail(email)
+    if (existingUser) {
+      return res.status(400).json({ error: 'An account with this email address already exists. Please log in.' })
+    }
 
-    // Generate and send initial Email Verification Code
+    const salt = bcrypt.genSaltSync(12)
+    const passwordHash = bcrypt.hashSync(password, salt)
+    const now = new Date().toISOString()
+    const userId = `user_${Date.now()}`
+
+    db.prepare(`
+      INSERT INTO users (id, name, email, phone, password_hash, email_verified, phone_verified, two_factor_enabled, role, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, 0, 1, 0, 'student', ?, ?)
+    `).run(userId, name.trim(), email.toLowerCase().trim(), phone ? phone.trim() : '', passwordHash, now, now)
+
+    const user = findUserById(userId)
+
+    // Generate Email verification OTP
     const emailVer = createVerification({
       userId: user.id,
       purpose: 'email_verify',
@@ -72,36 +91,23 @@ router.post('/signup', authLimiter, async (req, res) => {
     
     await sendVerificationEmail(user.email, user.name, emailVer.rawCode, verifyLink)
 
-    // Generate initial Phone OTP
-    const phoneVer = createVerification({
-      userId: user.id,
-      purpose: 'phone_verify',
-      destination: user.phone,
-      isNumeric: true,
-    })
-    await sendPhoneOtp(user.phone, phoneVer.rawCode, 'verification')
-
     const smtpReady = isSmtpConfigured()
 
     res.status(201).json({
       success: true,
-      message: 'Account created. Please verify your email and phone number.',
+      message: 'Account registered! Please enter the 6-digit verification code sent to your email.',
       userId: user.id,
       email: user.email,
-      phone: user.phone,
       maskedEmail: maskEmail(user.email),
-      maskedPhone: maskPhone(user.phone),
-      // In dev/demo mode when SMTP credentials are not yet added, provide code for frictionless testing
       devCode: !smtpReady ? emailVer.rawCode : undefined,
-      devPhoneCode: phoneVer.rawCode,
-      demoMode: !smtpReady,
     })
   } catch (err) {
+    console.error('Signup error:', err.message)
     res.status(400).json({ error: err.message || 'Signup failed.' })
   }
 })
 
-// 2. VERIFY EMAIL
+// 2. VERIFY EMAIL AND AUTO LOGIN
 router.post('/verify-email', otpLimiter, (req, res) => {
   try {
     const { userId, email, code } = req.body
@@ -116,14 +122,33 @@ router.post('/verify-email', otpLimiter, (req, res) => {
       return res.status(400).json({ error: 'User identifier and verification code are required.' })
     }
 
-    const result = verifyCode({ userId: targetUserId, purpose: 'email_verify', code: String(code).trim() })
-    res.json({ success: true, message: 'Email successfully verified.', emailVerified: true })
+    verifyCode({ userId: targetUserId, purpose: 'email_verify', code: String(code).trim() })
+
+    const user = findUserById(targetUserId)
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' })
+    }
+
+    const now = new Date().toISOString()
+    db.prepare('UPDATE users SET email_verified = 1, phone_verified = 1, last_login = ?, updated_at = ? WHERE id = ?').run(now, now, user.id)
+
+    const token = generateSessionToken(user)
+    setSessionCookie(res, token)
+
+    const { password_hash, ...safeUser } = user
+    res.json({
+      success: true,
+      message: 'Email successfully verified. You are now logged in.',
+      emailVerified: true,
+      user: safeUser,
+      token,
+    })
   } catch (err) {
     res.status(400).json({ error: err.message || 'Email verification failed.' })
   }
 })
 
-// 3. RESEND EMAIL VERIFICATION
+// 3. RESEND EMAIL VERIFICATION CODE
 router.post('/resend-email-otp', otpLimiter, async (req, res) => {
   try {
     const { userId, email } = req.body
@@ -131,7 +156,7 @@ router.post('/resend-email-otp', otpLimiter, async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found.' })
 
     if (user.email_verified) {
-      return res.status(400).json({ error: 'Email is already verified.' })
+      return res.status(400).json({ error: 'Email address is already verified.' })
     }
 
     const ver = createVerification({
@@ -157,69 +182,17 @@ router.post('/resend-email-otp', otpLimiter, async (req, res) => {
   }
 })
 
-// 4. VERIFY PHONE OTP
-router.post('/verify-phone', otpLimiter, (req, res) => {
-  try {
-    const { userId, phone, code } = req.body
-    let targetUserId = userId
-
-    if (!targetUserId && phone) {
-      const user = findUserByIdentifier(phone)
-      if (user) targetUserId = user.id
-    }
-
-    if (!targetUserId || !code) {
-      return res.status(400).json({ error: 'User identifier and OTP are required.' })
-    }
-
-    const result = verifyCode({ userId: targetUserId, purpose: 'phone_verify', code: String(code).trim() })
-    res.json({ success: true, message: 'Phone number successfully verified.', phoneVerified: true })
-  } catch (err) {
-    res.status(400).json({ error: err.message || 'Phone OTP verification failed.' })
-  }
-})
-
-// 5. RESEND PHONE OTP
-router.post('/resend-phone-otp', otpLimiter, async (req, res) => {
-  try {
-    const { userId, phone } = req.body
-    let user = userId ? findUserById(userId) : findUserByIdentifier(phone)
-    if (!user) return res.status(404).json({ error: 'User not found.' })
-
-    if (user.phone_verified) {
-      return res.status(400).json({ error: 'Phone number is already verified.' })
-    }
-
-    const ver = createVerification({
-      userId: user.id,
-      purpose: 'phone_verify',
-      destination: user.phone,
-      isNumeric: true,
-    })
-    await sendPhoneOtp(user.phone, ver.rawCode, 'verification')
-
-    res.json({
-      success: true,
-      message: 'New phone OTP sent.',
-      maskedPhone: maskPhone(user.phone),
-      devCode: ver.rawCode,
-    })
-  } catch (err) {
-    res.status(400).json({ error: err.message || 'Could not resend phone OTP.' })
-  }
-})
-
-// 6. LOGIN (Step 1: Check Password -> Trigger 2FA)
+// 4. LOGIN (Email & Password -> 2FA if enabled)
 router.post('/login', authLimiter, async (req, res) => {
   try {
     const { identifier, password } = req.body
     if (!identifier || !password) {
-      return res.status(400).json({ error: 'Email/Phone and password are required.' })
+      return res.status(400).json({ error: 'Email and password are required.' })
     }
 
     const user = findUserByIdentifier(identifier)
     if (!user) {
-      return res.status(401).json({ error: 'No account found with this email address or phone number.' })
+      return res.status(401).json({ error: 'No account found with this email address.' })
     }
 
     const passwordMatches = bcrypt.compareSync(password, user.password_hash)
@@ -229,7 +202,6 @@ router.post('/login', authLimiter, async (req, res) => {
 
     // Two-Step Verification Check
     if (user.two_factor_enabled) {
-      // Default: send 2FA OTP to email (or phone if preferred)
       const ver = createVerification({
         userId: user.id,
         purpose: 'login_2fa',
@@ -244,14 +216,13 @@ router.post('/login', authLimiter, async (req, res) => {
         require2FA: true,
         userId: user.id,
         maskedEmail: maskEmail(user.email),
-        maskedPhone: maskPhone(user.phone),
         channel: 'email',
         message: 'Security code sent to your registered email.',
         devCode: !smtpReady ? ver.rawCode : undefined,
       })
     }
 
-    // Direct Login if 2FA is disabled (e.g. Admin direct or testing)
+    // Direct Login
     const now = new Date().toISOString()
     db.prepare('UPDATE users SET last_login = ?, updated_at = ? WHERE id = ?').run(now, now, user.id)
 
@@ -265,41 +236,35 @@ router.post('/login', authLimiter, async (req, res) => {
   }
 })
 
-// 7. SWITCH / REQUEST 2FA CHANNEL (Email vs Phone)
+// 5. RESEND LOGIN 2FA OTP
 router.post('/send-2fa-otp', otpLimiter, async (req, res) => {
   try {
-    const { userId, channel } = req.body // channel = 'email' | 'phone'
+    const { userId } = req.body
     const user = findUserById(userId)
     if (!user) return res.status(404).json({ error: 'User not found.' })
 
-    const destination = channel === 'phone' ? user.phone : user.email
     const ver = createVerification({
       userId: user.id,
       purpose: 'login_2fa',
-      destination,
+      destination: user.email,
       isNumeric: true,
     })
 
-    if (channel === 'phone') {
-      await sendPhoneOtp(user.phone, ver.rawCode, '2fa')
-    } else {
-      await send2FAEmail(user.email, user.name, ver.rawCode)
-    }
-
+    await send2FAEmail(user.email, user.name, ver.rawCode)
     const smtpReady = isSmtpConfigured()
 
     res.json({
       success: true,
-      message: `Security code sent to your ${channel === 'phone' ? 'phone number' : 'email'}.`,
-      channel,
-      devCode: channel === 'phone' ? ver.rawCode : (!smtpReady ? ver.rawCode : undefined),
+      message: 'Security code sent to your email.',
+      channel: 'email',
+      devCode: !smtpReady ? ver.rawCode : undefined,
     })
   } catch (err) {
     res.status(400).json({ error: err.message || 'Could not send 2FA code.' })
   }
 })
 
-// 8. VERIFY 2FA AND ESTABLISH SESSION
+// 6. VERIFY 2FA AND ESTABLISH SESSION
 router.post('/verify-2fa', otpLimiter, (req, res) => {
   try {
     const { userId, code } = req.body
@@ -330,7 +295,7 @@ router.post('/verify-2fa', otpLimiter, (req, res) => {
   }
 })
 
-// 9. FORGOT PASSWORD REQUEST
+// 7. FORGOT PASSWORD REQUEST
 router.post('/forgot-password', authLimiter, async (req, res) => {
   try {
     const { email } = req.body
@@ -342,7 +307,7 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
         userId: user.id,
         purpose: 'password_reset',
         destination: user.email,
-        isNumeric: false, // 32-byte hex token
+        isNumeric: false,
       })
 
       const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`
@@ -350,7 +315,6 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
       await sendPasswordResetEmail(user.email, user.name, resetLink)
     }
 
-    // Always respond with success to prevent user enumeration attacks
     res.json({
       success: true,
       message: 'If an account exists with this email address, a password reset link has been sent.',
@@ -360,7 +324,7 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
   }
 })
 
-// 10. RESET PASSWORD
+// 8. RESET PASSWORD
 router.post('/reset-password', authLimiter, (req, res) => {
   try {
     const { token, email, newPassword } = req.body
@@ -369,7 +333,9 @@ router.post('/reset-password', authLimiter, (req, res) => {
     }
 
     if (!isStrongPassword(newPassword)) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters long and include an uppercase letter, lowercase letter, a number, and a special character.' })
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters long and include an uppercase letter, lowercase letter, a number, and a special character.',
+      })
     }
 
     const user = findUserByEmail(email)
@@ -389,12 +355,12 @@ router.post('/reset-password', authLimiter, (req, res) => {
   }
 })
 
-// 11. CURRENT USER (/api/auth/me)
+// 9. CURRENT USER
 router.get('/me', optionalAuthMiddleware, (req, res) => {
   res.json({ success: true, user: req.user || null })
 })
 
-// 12. LOGOUT
+// 10. LOGOUT
 router.post('/logout', (req, res) => {
   clearSessionCookie(res)
   res.json({ success: true, message: 'Successfully logged out.' })
