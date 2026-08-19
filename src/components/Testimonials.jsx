@@ -28,11 +28,13 @@ export default function Testimonials() {
               <div className="spotlight-quote-mark">“</div>
               
               <div className="spotlight-header">
-                <img src={activeReview.avatar} alt={activeReview.name} className="spotlight-avatar" />
-                <div>
-                  <h3 className="spotlight-name">{activeReview.name}</h3>
-                  <span className="spotlight-role">{activeReview.role}</span>
-                  <div className="spotlight-stars">⭐⭐⭐⭐⭐</div>
+                <div className="spotlight-user-info">
+                  <img src={activeReview.avatar} alt={activeReview.name} className="spotlight-avatar" />
+                  <div>
+                    <h3 className="spotlight-name">{activeReview.name}</h3>
+                    <span className="spotlight-role">{activeReview.role}</span>
+                    <div className="spotlight-stars">⭐⭐⭐⭐⭐</div>
+                  </div>
                 </div>
                 <span className="verified-badge-chip">✓ Verified Credential</span>
               </div>

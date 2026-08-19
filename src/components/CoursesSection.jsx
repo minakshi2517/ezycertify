@@ -40,7 +40,7 @@ export function CourseCard({ course, onEnroll }) {
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
             </svg>
-            <span>{course.duration || 'Live Virtual Cohort'}</span>
+            <span>{(course.duration || 'Live Virtual Cohort').replace(/contact\s*/gi, '').trim()}</span>
           </span>
           <Link to={`/courses/${course.slug}`} className="btn btn-blue btn-sm">
             {t.courses?.viewDetails || 'View Details'}
@@ -261,7 +261,7 @@ export default function CoursesSection({ limit = 8 }) {
           {/* Bottom View All Link when not filtered */}
           {!isFiltered && (
             <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-              <Link to="/courses" className="btn btn-outline-navy" style={{ padding: '0.75rem 2rem', fontWeight: 700 }}>
+              <Link to="/courses" className="btn btn-outline-navy" style={{ padding: '0.85rem 1.75rem', fontWeight: 700, whiteSpace: 'normal', maxWidth: '90vw', display: 'inline-block', lineHeight: 1.4 }}>
                 Explore All 64 Accredited Certification Programs →
               </Link>
             </div>

@@ -159,7 +159,7 @@ export const courses = [
     description: 'Ezycertify accredited curriculum PMP® training based on latest PMI Exam Content Outline (ECO). Covers People, Process, and Business Environment across Predictive, Agile, and Hybrid frameworks.',
     highlights: ['35+ Hours Live Virtual Learning & 35 PDU Certificate', '2500+ Practice Exam Questions & 8 Mock Exams', 'Coverage of 3 ECO Domains (People, Process, Business)', '100% PMP® Application Approval Support & Audit Guidance'],
     skills: ['Agile & Hybrid Lifecycle', 'Earned Value Management', 'Risk Management', 'Stakeholder Engagement'],
-    duration: '35 Contact Hours', rating: 4.9, students: 2450, priceUSD: 499,
+    duration: '35 Hours', rating: 4.9, students: 2450, priceUSD: 499,
     upcoming: [{ date: 'Aug 17 - Aug 25, 2026', time: 'Weekend Batch (7:00 PM - 11:00 PM IST)', mode: 'Live Virtual' }]
   },
   {
@@ -171,8 +171,8 @@ export const courses = [
     category: 'Agile & Scrum',
     badge: 'PMI Accredited',
     image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80',
-    description: 'Comprehensive PMI-ACP® masterclass covering Scrum, Kanban, Lean, XP, TDD, and Crystal. Satisfies 21 contact hours requirement.',
-    highlights: ['21 Contact Hours Certificate', '900+ Practice Exam Questions', 'Covers 7 PMI-ACP Agile Domains'],
+    description: 'Comprehensive PMI-ACP® masterclass covering Scrum, Kanban, Lean, XP, TDD, and Crystal. Satisfies 21 hours requirement.',
+    highlights: ['21 hours Certificate', '900+ Practice Exam Questions', 'Covers 7 PMI-ACP Agile Domains'],
     skills: ['Scrum & Kanban', 'Agile Velocity & Burndown', 'Adaptive Planning'],
     duration: '21 Hours', rating: 4.8, students: 1180, priceUSD: 449,
     upcoming: [{ date: 'Aug 24 - Aug 25, 2026', time: 'Weekend Batch (9:00 AM - 5:00 PM IST)', mode: 'Live Virtual' }]
@@ -187,7 +187,7 @@ export const courses = [
     badge: 'PMI Accredited',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
     description: 'Master requirements elicitation, traceability, solution evaluation, and stakeholder analysis for high-impact business outcomes.',
-    highlights: ['35 Contact Hours Certificate', 'Comprehensive Requirements Elicitation', 'Mock Exams & Application Review'],
+    highlights: ['35 hours Certificate', 'Comprehensive Requirements Elicitation', 'Mock Exams & Application Review'],
     skills: ['Needs Assessment', 'Requirements Traceability', 'Solution Evaluation'],
     duration: '35 Hours', rating: 4.8, students: 920, priceUSD: 499,
     upcoming: [{ date: 'Sep 07 - Sep 15, 2026', time: 'Weekend Batch (10:00 AM - 2:00 PM IST)', mode: 'Live Virtual' }]
@@ -216,8 +216,8 @@ export const courses = [
     category: 'Project Management',
     badge: 'PMI Accredited',
     image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80',
-    description: 'Entry-level project management certification based on PMBOK® 7th Edition. Fulfills 23 contact hours for early-career professionals.',
-    highlights: ['23 Contact Hours Certificate', 'Fundamental PMBOK Principles', '800+ Practice Questions'],
+    description: 'Entry-level project management certification based on PMBOK® 7th Edition. Fulfills 23 hours for early-career professionals.',
+    highlights: ['23 hours Certificate', 'Fundamental PMBOK Principles', '800+ Practice Questions'],
     skills: ['Project Fundamentals', 'Predictive Lifecycles', 'Business Analysis Basics'],
     duration: '23 Hours', rating: 4.7, students: 1350, priceUSD: 299,
     upcoming: [{ date: 'Aug 31 - Sep 02, 2026', time: 'Weekend (10:00 AM - 4:00 PM IST)', mode: 'Live Virtual' }]
@@ -247,7 +247,7 @@ export const courses = [
     badge: 'PMI Accredited',
     image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
     description: 'Specialize in identifying project threats, quantitative risk analysis, Monte Carlo simulation, and contingency mitigation.',
-    highlights: ['30 Contact Hours', 'Quantitative Risk Modeling', 'Monte Carlo & Decision Tree Analysis'],
+    highlights: ['30 Hours', 'Quantitative Risk Modeling', 'Monte Carlo & Decision Tree Analysis'],
     skills: ['Threat Analysis', 'Quantitative Risk Assessment', 'Contingency Planning'],
     duration: '30 Hours', rating: 4.8, students: 760, priceUSD: 549,
     upcoming: [{ date: 'Sep 10 - Sep 14, 2026', time: 'Weekend (9:00 AM - 5:00 PM IST)', mode: 'Live Virtual' }]
@@ -262,7 +262,7 @@ export const courses = [
     badge: 'PMI Accredited',
     image: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80',
     description: 'Demonstrate expertise in complex project schedule development, critical path method (CPM), and timeline optimization.',
-    highlights: ['30 Contact Hours', 'Critical Path & Earned Schedule Analysis', 'Resource Leveling'],
+    highlights: ['30 Hours', 'Critical Path & Earned Schedule Analysis', 'Resource Leveling'],
     skills: ['CPM Scheduling', 'Schedule Variance (SV)', 'Resource Optimization'],
     duration: '30 Hours', rating: 4.7, students: 510, priceUSD: 549,
     upcoming: [{ date: 'Oct 01 - Oct 05, 2026', time: 'Weekend (10:00 AM - 4:00 PM IST)', mode: 'Live Virtual' }]
@@ -1164,7 +1164,7 @@ export const sampleCertificates = [
     issueDate: 'August 02, 2026',
     credentialId: 'EZ-8849-PMP',
     status: 'Verified & Active',
-    pdu: '35 Contact Hours',
+    pdu: '35 Hours',
     instructor: 'Ezycertify Academic Board',
   },
   {
