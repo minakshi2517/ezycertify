@@ -45,7 +45,7 @@ export default function CourseDetailPage() {
           borderRadius: 'var(--radius-lg)',
           padding: '3rem 2.5rem',
           display: 'grid',
-          gridTemplateColumns: '1.5fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: '2.5rem',
           alignItems: 'center',
           boxShadow: 'var(--shadow-lg)',
@@ -112,7 +112,7 @@ export default function CourseDetailPage() {
         </div>
 
         {/* Highlights & Skills Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
           <div style={{ background: 'var(--white)', padding: '2.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-sm)' }}>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--navy)', marginBottom: '1.5rem' }}>
               Course Highlights

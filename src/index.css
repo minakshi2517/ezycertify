@@ -2129,3 +2129,277 @@ body {
   }
 }
 
+
+
+/* =========================================================
+   COMPREHENSIVE GLOBAL RESPONSIVE STYLES & MOBILE OPTIMIZATIONS
+   ========================================================= */
+
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Tablet & Mobile Screens (<= 992px) */
+@media (max-width: 992px) {
+  :root {
+    --header-h: 70px !important;
+  }
+
+  .header {
+    height: 70px !important;
+  }
+
+  .logo-img-header {
+    height: 42px !important;
+    max-height: 45px !important;
+  }
+
+  .kh-all-courses-btn,
+  .kh-search-wrapper {
+    display: none !important;
+  }
+
+  .header-left-group {
+    gap: 0.5rem !important;
+    flex: unset !important;
+    max-width: unset !important;
+  }
+
+  .header-actions {
+    gap: 0.4rem !important;
+  }
+
+  .lang-select {
+    padding: 0.35rem 1.4rem 0.35rem 0.5rem !important;
+    font-size: 0.72rem !important;
+    max-width: 110px !important;
+  }
+
+  .currency-badge {
+    font-size: 0.7rem !important;
+    padding: 0.2rem 0.4rem !important;
+  }
+
+  .menu-toggle {
+    display: flex !important;
+  }
+
+  .nav-desktop {
+    display: none !important;
+  }
+
+  .hero-light-section {
+    padding-top: calc(70px + 1.5rem) !important;
+    padding-bottom: 2.5rem !important;
+    min-height: auto !important;
+  }
+
+  .hero-light-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  .hero-light-title {
+    font-size: 2.1rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .hero-light-subtitle {
+    font-size: 0.95rem !important;
+    line-height: 1.55 !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .hero-double-image-wrapper {
+    padding-bottom: 0 !important;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .hero-main-img {
+    height: 280px !important;
+  }
+
+  .hero-overlap-card {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 280px !important;
+    margin-top: 1rem !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+  }
+
+  .hero-overlap-img {
+    height: 140px !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2rem !important;
+  }
+
+  .nav-mega-dropdown {
+    display: none !important;
+  }
+}
+
+/* Mobile Screens (<= 768px) */
+@media (max-width: 768px) {
+  :root {
+    --header-h: 65px !important;
+  }
+
+  .header {
+    height: 65px !important;
+  }
+
+  .logo-img-header {
+    height: 38px !important;
+  }
+
+  .lang-select,
+  .currency-badge {
+    display: none !important;
+  }
+
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .hero-light-title {
+    font-size: 1.85rem !important;
+  }
+
+  .hero-light-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 0.85rem 1.25rem !important;
+  }
+
+  .hero-bottom-stats {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+
+  .hero-avatars-pill {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .courses-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .category-filter {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 0.6rem !important;
+    margin: 1.25rem 0 !important;
+  }
+
+  .category-pill {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  .footer-bottom {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+
+  .pay-modal {
+    max-width: 95vw !important;
+    margin: 1rem auto !important;
+    padding: 1.25rem !important;
+  }
+
+  .cert-card-preview {
+    padding: 1.5rem 1rem !important;
+    border-width: 4px !important;
+  }
+
+  .cert-seal {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 0.5rem !important;
+    top: 1rem !important;
+    right: 1rem !important;
+  }
+
+  .why-grid,
+  .testimonials-grid,
+  .review-spotlight-grid,
+  .features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .courses-container-box,
+  .why-us-box,
+  .testimonials-box,
+  .features-section-box,
+  .review-section-box {
+    padding: 1.5rem 1rem !important;
+    margin: 1.25rem 0 !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* Very Small Mobile (<= 480px) */
+@media (max-width: 480px) {
+  .hero-light-title {
+    font-size: 1.65rem !important;
+  }
+
+  .hero-main-img {
+    height: 220px !important;
+  }
+
+  .nav-login-btn {
+    padding: 0.35rem 0.8rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .header-actions .btn-sm {
+    padding: 0.35rem 0.65rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .stat-big-num {
+    font-size: 1.8rem !important;
+  }
+}
