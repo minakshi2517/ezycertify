@@ -1,5 +1,5 @@
 export const WHATSAPP_NUMBER = '919685140726'
-export const PHONE_NUMBER = '+1 (507) 923-1182'
+export const PHONE_NUMBER = '+91 96851 40726'
 export const US_ADDRESS = '217 N 5th Street, Apt 2, Brainerd MN 56401 USA'
 export const NIGERIA_ADDRESS = '9, Bamisile Street, off Allen Avenue, Ikeja, Lagos, Nigeria'
 export const ADDRESS_TEXT = '217 N 5th Street, Apt 2, Brainerd MN 56401 USA'
@@ -18,7 +18,7 @@ export const OFFICES = [
   },
 ]
 export const EMAIL_ADDRESS = 'info@ezycertify.com'
-export const WHATSAPP_LINK = 'https://wa.me/message/DRE4LOL5H2Q3N1'
+export const WHATSAPP_LINK = 'https://wa.me/919685140726'
 export const INSTAGRAM_LINK = 'https://www.instagram.com/ezycertify/?hl=en'
 export const LINKEDIN_LINK = 'https://www.linkedin.com/in/ezy-certify-5b4167429/'
 
