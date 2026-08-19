@@ -1,4 +1,4 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 import { db } from '../db/database.js'
 import { adminMiddleware } from '../services/sessionService.js'
 
@@ -90,7 +90,54 @@ router.get('/courses', (req, res) => {
   }
 })
 
-// 4. PAYMENTS LIST
+// 4. CREATE NEW COURSE (Admin)
+router.post('/courses', (req, res) => {
+  try {
+    const { title, short_title, provider_id, category, price_usd, duration, description, badge } = req.body
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: 'Course title is required.' })
+    }
+
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    const id = `course_${Date.now()}`
+    const now = new Date().toISOString()
+
+    db.prepare(`
+      INSERT INTO courses (id, slug, title, short_title, provider_id, category, badge, description, price_usd, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)
+    `).run(
+      id,
+      slug,
+      title.trim(),
+      short_title || title.trim(),
+      provider_id || 'Ezycertify',
+      category || 'Certifications',
+      badge || 'Popular',
+      description || '',
+      Number(price_usd) || 499,
+      now,
+      now
+    )
+
+    const created = db.prepare('SELECT * FROM courses WHERE id = ?').get(id)
+    res.json({ success: true, message: 'Course created successfully.', course: created })
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to create course.' })
+  }
+})
+
+// 5. DELETE COURSE (Admin)
+router.delete('/courses/:id', (req, res) => {
+  try {
+    const { id } = req.params
+    db.prepare('DELETE FROM courses WHERE id = ?').run(id)
+    res.json({ success: true, message: 'Course deleted successfully.' })
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to delete course.' })
+  }
+})
+
+// 6. PAYMENTS LIST
 router.get('/payments', (req, res) => {
   try {
     const payments = db.prepare(`
@@ -107,7 +154,7 @@ router.get('/payments', (req, res) => {
   }
 })
 
-// 5. ENROLLMENTS LIST
+// 7. ENROLLMENTS LIST
 router.get('/enrollments', (req, res) => {
   try {
     const enrollments = db.prepare(`
@@ -124,7 +171,7 @@ router.get('/enrollments', (req, res) => {
   }
 })
 
-// 6. TOGGLE ENROLLMENT ACCESS STATUS (Grant / Revoke)
+// 8. TOGGLE ENROLLMENT ACCESS STATUS (Grant / Revoke)
 router.patch('/enrollments/:id/access', (req, res) => {
   try {
     const { id } = req.params

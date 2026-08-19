@@ -1,4 +1,4 @@
-export function apiUrl(path) {
+﻿export function apiUrl(path) {
   const base = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
   return `${base}${path.startsWith('/') ? path : `/${path}`}`
 }
@@ -12,7 +12,7 @@ async function request(path, options = {}) {
   const config = {
     ...options,
     headers,
-    credentials: 'include', // Ensures HTTP-only cookies are sent/received
+    credentials: 'include',
   }
 
   let res
@@ -75,6 +75,8 @@ export const api = {
     getOverview: () => api.get('/api/admin/overview'),
     getUsers: () => api.get('/api/admin/users'),
     getCourses: () => api.get('/api/admin/courses'),
+    createCourse: (data) => api.post('/api/admin/courses', data),
+    deleteCourse: (id) => api.delete(`/api/admin/courses/${id}`),
     getPayments: () => api.get('/api/admin/payments'),
     getEnrollments: () => api.get('/api/admin/enrollments'),
     updateAccess: (id, access_status) => api.patch(`/api/admin/enrollments/${id}/access`, { access_status }),
