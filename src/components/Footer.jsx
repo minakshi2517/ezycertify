@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { PHONE_NUMBER, ADDRESS_TEXT, EMAIL_ADDRESS, WHATSAPP_LINK, INSTAGRAM_LINK, LINKEDIN_LINK } from '../data/siteData'
+import { PHONE_NUMBER, US_ADDRESS, NIGERIA_ADDRESS, EMAIL_ADDRESS, WHATSAPP_LINK, INSTAGRAM_LINK, LINKEDIN_LINK } from '../data/siteData'
 
 export default function Footer() {
   const { t } = useApp()
@@ -88,8 +88,12 @@ export default function Footer() {
             <h4>Contact Info</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.75)' }}>
               <div>
-                <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Corporate Office</strong>
-                <span>{ADDRESS_TEXT}</span>
+                <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>🇺🇸 USA Office</strong>
+                <span>{US_ADDRESS}</span>
+              </div>
+              <div>
+                <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>🇳🇬 Nigeria Office</strong>
+                <span>{NIGERIA_ADDRESS}</span>
               </div>
               <div>
                 <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Phone Support</strong>
@@ -105,7 +109,7 @@ export default function Footer() {
               </div>
               <div>
                 <strong style={{ color: '#60a5fa', display: 'block', marginBottom: '0.2rem' }}>Working Hours</strong>
-                <span>Monday – Saturday (9:00 AM – 7:00 PM IST)</span>
+                <span>Monday – Saturday (9:00 AM – 7:00 PM)</span>
               </div>
             </div>
           </div>

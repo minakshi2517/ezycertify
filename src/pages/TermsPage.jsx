@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ADDRESS_TEXT, EMAIL_ADDRESS, PHONE_NUMBER } from '../data/siteData'
+import { US_ADDRESS, NIGERIA_ADDRESS, EMAIL_ADDRESS, PHONE_NUMBER } from '../data/siteData'
 
 export default function TermsPage() {
   return (
@@ -95,7 +95,8 @@ export default function TermsPage() {
                 Ezycertify Academic Support Desk
               </div>
               <div style={{ fontSize: '0.92rem', color: '#1e40af', lineHeight: 1.7 }}>
-                📍 <strong>Registered Address:</strong> {ADDRESS_TEXT}<br />
+                📍 <strong>USA Office:</strong> {US_ADDRESS}<br />
+                📍 <strong>Nigeria Office:</strong> {NIGERIA_ADDRESS}<br />
                 📧 <strong>Support Email:</strong> <a href={`mailto:${EMAIL_ADDRESS}`} style={{ color: '#0074e4', textDecoration: 'underline' }}>{EMAIL_ADDRESS}</a><br />
                 📞 <strong>Direct Helpline:</strong> {PHONE_NUMBER}
               </div>

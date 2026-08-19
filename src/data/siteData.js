@@ -1,6 +1,22 @@
 export const WHATSAPP_NUMBER = '919685140726'
-export const PHONE_NUMBER = '+91 96851 40726'
-export const ADDRESS_TEXT = '11th floor - 1101 Aeropolis Phase 1 - Opp SBI Bank, Porwal Road Lohegaon Pune - 411047'
+export const PHONE_NUMBER = '+1 (507) 923-1182'
+export const US_ADDRESS = '217 N 5th Street, Apt 2, Brainerd MN 56401 USA'
+export const NIGERIA_ADDRESS = '9, Bamisile Street, off Allen Avenue, Ikeja, Lagos, Nigeria'
+export const ADDRESS_TEXT = '217 N 5th Street, Apt 2, Brainerd MN 56401 USA'
+export const OFFICES = [
+  {
+    country: 'United States',
+    flag: '🇺🇸',
+    title: 'USA Office',
+    address: '217 N 5th Street, Apt 2, Brainerd MN 56401 USA',
+  },
+  {
+    country: 'Nigeria',
+    flag: '🇳🇬',
+    title: 'Nigeria Office',
+    address: '9, Bamisile Street, off Allen Avenue, Ikeja, Lagos, Nigeria',
+  },
+]
 export const EMAIL_ADDRESS = 'info@ezycertify.com'
 export const WHATSAPP_LINK = 'https://wa.me/message/DRE4LOL5H2Q3N1'
 export const INSTAGRAM_LINK = 'https://www.instagram.com/ezycertify/?hl=en'

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ADDRESS_TEXT, PHONE_NUMBER, EMAIL_ADDRESS, courses, partnerLogos } from '../data/siteData'
+import { US_ADDRESS, NIGERIA_ADDRESS, PHONE_NUMBER, EMAIL_ADDRESS, courses, partnerLogos } from '../data/siteData'
 import { globalCountryCodes } from '../data/countryData'
 
 export default function ContactPage() {
@@ -44,8 +44,8 @@ export default function ContactPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '3rem', alignItems: 'start', marginBottom: '4rem' }}>
           {/* Contact Details Cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ background: 'var(--white)', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ background: 'var(--white)', padding: '1.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
                 <div className="why-icon-static">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -54,13 +54,28 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)', marginBottom: '0.35rem' }}>Headquarters Address</h3>
-                  <p style={{ fontSize: '0.9rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>{ADDRESS_TEXT}</p>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy)', marginBottom: '0.35rem' }}>🇺🇸 USA Office</h3>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>{US_ADDRESS}</p>
                 </div>
               </div>
             </div>
 
-            <div style={{ background: 'var(--white)', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ background: 'var(--white)', padding: '1.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
+                <div className="why-icon-static">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy)', marginBottom: '0.35rem' }}>🇳🇬 Nigeria Office</h3>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--gray-600)', lineHeight: 1.6 }}>{NIGERIA_ADDRESS}</p>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: 'var(--white)', padding: '1.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
                 <div className="why-icon-static">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -68,13 +83,13 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)' }}>Contact Number</h3>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy)' }}>Contact Helpline</h3>
                   <p style={{ fontSize: '0.95rem', color: 'var(--blue)', fontWeight: 700, marginTop: '0.2rem' }}>{PHONE_NUMBER}</p>
                 </div>
               </div>
             </div>
 
-            <div style={{ background: 'var(--white)', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ background: 'var(--white)', padding: '1.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
                 <div className="why-icon-static">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -83,14 +98,14 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy)' }}>Email Inquiry</h3>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy)' }}>Email Inquiry</h3>
                   <p style={{ fontSize: '0.95rem', color: 'var(--blue)', fontWeight: 700, marginTop: '0.2rem' }}>{EMAIL_ADDRESS}</p>
                 </div>
               </div>
             </div>
 
-            <div style={{ background: 'var(--navy)', color: 'var(--white)', padding: '2rem', borderRadius: 'var(--radius)' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#60a5fa', marginBottom: '0.5rem' }}>Global Virtual Cohorts</h3>
+            <div style={{ background: 'var(--navy)', color: 'var(--white)', padding: '1.75rem', borderRadius: 'var(--radius)' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#60a5fa', marginBottom: '0.5rem' }}>Global Virtual Cohorts</h3>
               <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.85)' }}>Americas, EMEA, APAC Timezone Cohorts Available</p>
               <p style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.65)', marginTop: '0.3rem' }}>24x7 Academic Support & Exam Application Approval Guidance</p>
             </div>
@@ -238,17 +253,24 @@ export default function ContactPage() {
           boxShadow: 'var(--shadow-md)'
         }}>
           <div style={{ marginBottom: '1.5rem' }}>
-            <span className="section-label">VISIT OUR ACADEMY</span>
-            <h2 className="section-title" style={{ fontSize: '1.85rem' }}>Our Headquarters Location</h2>
-            <p style={{ color: 'var(--gray-600)', fontSize: '0.95rem' }}>
-              {ADDRESS_TEXT}
-            </p>
+            <span className="section-label">VISIT OUR OFFICES</span>
+            <h2 className="section-title" style={{ fontSize: '1.85rem' }}>Global Office Locations</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+              <div style={{ background: 'var(--gray-50)', padding: '1.25rem', borderRadius: '8px', border: '1px solid var(--gray-200)' }}>
+                <strong style={{ color: 'var(--navy)', display: 'block', marginBottom: '0.35rem', fontSize: '1rem' }}>🇺🇸 USA Office</strong>
+                <p style={{ color: 'var(--gray-600)', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>{US_ADDRESS}</p>
+              </div>
+              <div style={{ background: 'var(--gray-50)', padding: '1.25rem', borderRadius: '8px', border: '1px solid var(--gray-200)' }}>
+                <strong style={{ color: 'var(--navy)', display: 'block', marginBottom: '0.35rem', fontSize: '1rem' }}>🇳🇬 Nigeria Office</strong>
+                <p style={{ color: 'var(--gray-600)', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>{NIGERIA_ADDRESS}</p>
+              </div>
+            </div>
           </div>
 
-          <div style={{ borderRadius: 'var(--radius)', overflow: 'hidden', height: '420px', border: '1px solid var(--gray-200)' }}>
+          <div style={{ borderRadius: 'var(--radius)', overflow: 'hidden', height: '400px', border: '1px solid var(--gray-200)' }}>
             <iframe
-              title="Ezycertify HQ Map Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3781.700147663456!2d73.9056!3d18.5875!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c14041b65e9b%3A0xb3a82207b719cbdf!2sPorwal%20Rd%2C%20Lohegaon%2C%20Pune%2C%20Maharashtra%20411047!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+              title="Ezycertify Office Map Location"
+              src="https://maps.google.com/maps?q=217+N+5th+Street,+Brainerd,+MN+56401&t=&z=14&ie=UTF8&iwloc=&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0 }}

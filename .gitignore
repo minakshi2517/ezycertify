@@ -4,7 +4,6 @@ node_modules/
 .pnp.js
 
 # Production builds
-dist/
 dist-ssr/
 *.local
 
@@ -20,6 +19,8 @@ server/data/*.db
 server/data/*.db-journal
 server/data/*.db-wal
 server/data/*.db-shm
+server/data/*.tmp
+server/data/ezycertify.json*
 *.sqlite
 *.sqlite3
 
