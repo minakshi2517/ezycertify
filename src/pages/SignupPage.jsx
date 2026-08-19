@@ -50,6 +50,11 @@ export default function SignupPage() {
       return
     }
 
+    if (!phone.trim()) {
+      setError('Phone number is required.')
+      return
+    }
+
     if (!isPassValid) {
       setError('Password must meet all security requirements.')
       return
@@ -189,10 +194,11 @@ export default function SignupPage() {
 
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '0.35rem' }}>
-                Phone Number (Optional)
+                Phone Number *
               </label>
               <input
                 type="tel"
+                required
                 placeholder="+91 9876543210"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
