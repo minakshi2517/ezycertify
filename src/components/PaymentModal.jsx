@@ -23,8 +23,8 @@ function safeHtml(str) {
 }
 
 export default function PaymentModal({ course, batch, onClose }) {
-  const { currency, user, fxTick } = useApp()
-  const displayPrice = formatCoursePrice(course, 'INR', '₹')
+  const { currency, currencySymbol, user, fxTick } = useApp()
+  const displayPrice = formatCoursePrice(course, currency, currencySymbol)
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
