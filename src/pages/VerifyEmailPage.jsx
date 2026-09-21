@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { useApp } from '../context/AppContext'
 import { api } from '../lib/api'
 
 export default function VerifyEmailPage() {
+  const { setUser } = useApp()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -24,7 +26,8 @@ export default function VerifyEmailPage() {
     setStatus('verifying')
     setMessage('')
     try {
-      await api.auth.verifyEmail({ email: targetEmail, code: targetCode })
+      const res = await api.auth.verifyEmail({ email: targetEmail, code: targetCode })
+      if (res.user) setUser(res.user)
       setStatus('success')
       setMessage('Your email has been verified successfully!')
     } catch (err) {

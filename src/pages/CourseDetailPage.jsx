@@ -1,16 +1,37 @@
-import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getCourseBySlug, formatCoursePrice, WHATSAPP_LINK } from '../data/siteData'
 import PaymentModal from '../components/PaymentModal'
+import { signupRedirectState } from '../lib/enrollAuth'
 
 export default function CourseDetailPage() {
   const { slug } = useParams()
-  const { currency, currencySymbol, catalogCourses, fxTick } = useApp()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { currency, currencySymbol, catalogCourses, fxTick, user, loadingAuth } = useApp()
   const course = catalogCourses.find((item) => item.slug === slug) || getCourseBySlug(slug)
 
   const [showModal, setShowModal] = useState(false)
   const [selectedBatch, setSelectedBatch] = useState('')
+
+  const startEnroll = (batchLabel = '') => {
+    if (loadingAuth) return
+    if (!user) {
+      navigate('/signup', { state: signupRedirectState(location) })
+      return
+    }
+    if (batchLabel) setSelectedBatch(batchLabel)
+    setShowModal(true)
+  }
+
+  useEffect(() => {
+    if (loadingAuth) return
+    if (user && location.state?.enroll) {
+      setShowModal(true)
+      navigate(location.pathname + (location.search || ''), { replace: true, state: {} })
+    }
+  }, [user, loadingAuth, location.state?.enroll])
 
   if (!course) {
     return (
@@ -96,7 +117,7 @@ export default function CourseDetailPage() {
             <p style={{ fontSize: '0.8rem', color: 'var(--gray-600)', marginBottom: '1.5rem' }}>Includes Exam Prep & Lifetime Support</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <button className="btn btn-red" onClick={() => setShowModal(true)}>
+              <button className="btn btn-red" onClick={() => startEnroll()}>
                 Enroll Now
               </button>
               <a
@@ -170,10 +191,7 @@ export default function CourseDetailPage() {
                     <td style={{ padding: '1rem', textAlign: 'right' }}>
                       <button
                         className="btn btn-red btn-sm"
-                        onClick={() => {
-                          setSelectedBatch(`${batch.date} (${batch.time})`)
-                          setShowModal(true)
-                        }}
+                        onClick={() => startEnroll(`${batch.date} (${batch.time})`)}
                       >
                         Book Seat
                       </button>

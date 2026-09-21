@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { api } from '../lib/api'
+import { pathFromAuthState } from '../lib/enrollAuth'
 
 export default function LoginPage() {
   const { setUser } = useApp()
@@ -50,8 +51,11 @@ export default function LoginPage() {
         setSuccessMsg(res.message || 'Please enter the security verification code sent to your email.')
       } else if (res.user) {
         setUser(res.user)
-        const from = location.state?.from?.pathname || (res.user.role === 'admin' ? '/admin' : '/')
-        navigate(from, { replace: true })
+        const dest = pathFromAuthState(location)
+        navigate(dest === '/' && res.user.role === 'admin' ? '/admin' : dest, {
+          replace: true,
+          state: location.state?.enroll ? { enroll: true } : undefined,
+        })
       }
     } catch (err) {
       setError(err.message)
@@ -86,8 +90,11 @@ export default function LoginPage() {
       const res = await api.auth.verify2FA({ userId, code })
       if (res.user) {
         setUser(res.user)
-        const from = location.state?.from?.pathname || (res.user.role === 'admin' ? '/admin' : '/')
-        navigate(from, { replace: true })
+        const dest = pathFromAuthState(location)
+        navigate(dest === '/' && res.user.role === 'admin' ? '/admin' : dest, {
+          replace: true,
+          state: location.state?.enroll ? { enroll: true } : undefined,
+        })
       }
     } catch (err) {
       setError(err.message)
@@ -304,7 +311,7 @@ export default function LoginPage() {
         {/* Footer Redirect Links */}
         <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem', color: '#64748b' }}>
           Don't have an account?{' '}
-          <Link to="/signup" style={{ color: '#0074e4', fontWeight: 700, textDecoration: 'underline' }}>
+          <Link to="/signup" state={location.state} style={{ color: '#0074e4', fontWeight: 700, textDecoration: 'underline' }}>
             Sign Up
           </Link>
         </div>

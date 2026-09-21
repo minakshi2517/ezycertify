@@ -1,50 +1,80 @@
 import nodemailer from 'nodemailer'
 import { getSmtpConfig } from './smtpConfig.js'
 
-let transporter = null
+async function sendWithTransport({ host, user, pass, port, secure, from, to, subject, html, text }) {
+  const mailer = nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    requireTLS: !secure,
+    auth: { user, pass },
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 20000,
+    tls: {
+      minVersion: 'TLSv1.2',
+      servername: host,
+    },
+  })
 
-function getTransporter() {
-  if (transporter) return transporter
-  const smtp = getSmtpConfig()
-  if (!smtp.ready) return null
-
-  try {
-    transporter = nodemailer.createTransport({
-      host: smtp.host,
-      port: smtp.port,
-      secure: smtp.secure,
-      auth: { user: smtp.user, pass: smtp.pass },
-    })
-  } catch (e) {
-    console.warn('[Email Transporter Init Error]:', e.message)
-    transporter = null
-  }
-  return transporter
+  const info = await mailer.sendMail({
+    from,
+    to,
+    subject,
+    html,
+    text,
+    envelope: { from: user, to },
+  })
+  await mailer.close()
+  return info
 }
 
 export async function sendEmail({ to, subject, html, text, logHeader = 'EMAIL' }) {
-  const mailer = getTransporter()
   const smtp = getSmtpConfig()
-  const from = smtp.from || '"Ezycertify" <support@ezycertify.com>'
+  if (!smtp.ready) {
+    console.error(`[Email] ${logHeader} not sent — SMTP is not configured.`)
+    throw new Error('Email service is not configured on the server.')
+  }
 
-  if (mailer) {
+  const from = smtp.from && smtp.from.includes(smtp.user)
+    ? smtp.from
+    : `"Ezycertify" <${smtp.user}>`
+  const plain = text || String(html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  const attempts = [
+    { port: smtp.port || 465, secure: smtp.port === 587 ? false : true },
+    { port: 465, secure: true },
+    { port: 587, secure: false },
+  ]
+
+  const tried = new Set()
+  let lastError = null
+
+  for (const attempt of attempts) {
+    const key = `${attempt.port}:${attempt.secure}`
+    if (tried.has(key)) continue
+    tried.add(key)
     try {
-      const info = await mailer.sendMail({ from, to, subject, html, text })
-      console.log(`[Email] Sent to ${to}: ${subject} (MessageId: ${info.messageId})`)
+      const info = await sendWithTransport({
+        host: smtp.host,
+        user: smtp.user,
+        pass: smtp.pass,
+        port: attempt.port,
+        secure: attempt.secure,
+        from,
+        to,
+        subject,
+        html,
+        text: plain,
+      })
+      console.log(`[Email] Sent to ${to}: ${subject} via ${smtp.host}:${attempt.port} (${info.messageId})`)
       return { success: true, messageId: info.messageId }
     } catch (err) {
-      console.error(`[Email Error] Failed sending to ${to}:`, err.message)
-      console.log(`[Email Dev Fallback] Falling back to console logger...`)
+      lastError = err
+      console.error(`[Email] ${smtp.host}:${attempt.port} failed:`, err.message)
     }
   }
 
-  // Developer / Local fallback logger
-  console.log(`\n================== [${logHeader}] ==================`)
-  console.log(`To: ${to}`)
-  console.log(`Subject: ${subject}`)
-  console.log(`Text: ${text || html.replace(/<[^>]*>/g, '')}`)
-  console.log(`=====================================================\n`)
-  return { success: true, localLogged: true }
+  throw new Error(lastError?.message || 'Could not send email through Hostinger SMTP.')
 }
 
 export async function sendVerificationEmail(email, name, otp, link) {
@@ -64,7 +94,13 @@ export async function sendVerificationEmail(email, name, otp, link) {
       <p style="font-size: 13px; color: #64748b; margin-top: 24px;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
     </div>
   `
-  return sendEmail({ to: email, subject, html, logHeader: 'EMAIL VERIFICATION' })
+  return sendEmail({
+    to: email,
+    subject,
+    html,
+    text: `Hi ${name}, your Ezycertify verification code is ${otp}. It expires in 10 minutes.`,
+    logHeader: 'EMAIL VERIFICATION',
+  })
 }
 
 export async function send2FAEmail(email, name, otp) {
@@ -82,7 +118,13 @@ export async function send2FAEmail(email, name, otp) {
       <p style="font-size: 13px; color: #64748b;">This security code is single-use and expires in 10 minutes. Never share this code with anyone.</p>
     </div>
   `
-  return sendEmail({ to: email, subject, html, logHeader: 'LOGIN 2FA CODE' })
+  return sendEmail({
+    to: email,
+    subject,
+    html,
+    text: `Hi ${name}, your Ezycertify login code is ${otp}.`,
+    logHeader: 'LOGIN 2FA CODE',
+  })
 }
 
 export async function sendPasswordResetEmail(email, name, link) {
@@ -100,7 +142,7 @@ export async function sendPasswordResetEmail(email, name, link) {
       <p style="font-size: 13px; color: #64748b;">This link is valid for 1 hour. If you did not make this request, you can safely ignore this email.</p>
     </div>
   `
-  return sendEmail({ to: email, subject, html, logHeader: 'PASSWORD RESET LINK' })
+  return sendEmail({ to: email, subject, html, text: `Reset your password: ${link}`, logHeader: 'PASSWORD RESET LINK' })
 }
 
 export async function sendEnrollmentEmail({ email, name, courseTitle, batch, receiptId, amount, currency }) {
@@ -118,5 +160,11 @@ export async function sendEnrollmentEmail({ email, name, courseTitle, batch, rec
       <p>You can access your course materials and batch live links from your student dashboard.</p>
     </div>
   `
-  return sendEmail({ to: email, subject, html, logHeader: 'ENROLLMENT CONFIRMATION' })
+  return sendEmail({
+    to: email,
+    subject,
+    html,
+    text: `Enrollment confirmed for ${courseTitle}. Receipt ${receiptId}.`,
+    logHeader: 'ENROLLMENT CONFIRMATION',
+  })
 }

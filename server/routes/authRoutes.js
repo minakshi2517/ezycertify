@@ -47,6 +47,14 @@ function isSmtpConfigured() {
   return getSmtpConfig().ready
 }
 
+function publicAppUrl(req) {
+  const envUrl = String(process.env.APP_URL || process.env.PUBLIC_SITE_URL || '').trim().replace(/\/$/, '')
+  if (envUrl) return envUrl
+  const proto = String(req.get('x-forwarded-proto') || req.protocol || 'https').split(',')[0].trim()
+  const host = String(req.get('x-forwarded-host') || req.get('host') || '').split(',')[0].trim()
+  return `${proto}://${host}`
+}
+
 // 1. SIGNUP (Email-based)
 router.post('/signup', authLimiter, async (req, res) => {
   try {
@@ -86,24 +94,31 @@ router.post('/signup', authLimiter, async (req, res) => {
       isNumeric: true,
     })
 
-    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`
+    const appUrl = publicAppUrl(req)
     const verifyLink = `${appUrl}/verify-email?token=${emailVer.rawCode}&email=${encodeURIComponent(user.email)}`
     
     try {
       await sendVerificationEmail(user.email, user.name, emailVer.rawCode, verifyLink)
     } catch (mailErr) {
       console.error('[Signup] Account created but email failed:', mailErr.message)
+      return res.status(201).json({
+        success: true,
+        message: 'Account created, but the verification email could not be sent. Please tap Resend code. If it still fails, check spam or contact support.',
+        userId: user.id,
+        email: user.email,
+        maskedEmail: maskEmail(user.email),
+        emailSent: false,
+        emailError: mailErr.message,
+      })
     }
-
-    const smtpReady = isSmtpConfigured()
 
     res.status(201).json({
       success: true,
-      message: 'Account registered! Please enter the 6-digit verification code sent to your email.',
+      message: 'Account registered! Enter the 6-digit verification code sent to your email.',
       userId: user.id,
       email: user.email,
       maskedEmail: maskEmail(user.email),
-      devCode: !smtpReady ? emailVer.rawCode : undefined,
+      emailSent: true,
     })
   } catch (err) {
     console.error('Signup error:', err.message)
@@ -170,7 +185,7 @@ router.post('/resend-email-otp', otpLimiter, async (req, res) => {
       isNumeric: true,
     })
 
-    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`
+    const appUrl = publicAppUrl(req)
     const verifyLink = `${appUrl}/verify-email?token=${ver.rawCode}&email=${encodeURIComponent(user.email)}`
     await sendVerificationEmail(user.email, user.name, ver.rawCode, verifyLink)
 

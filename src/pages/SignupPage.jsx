@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { api } from '../lib/api'
+import { pathFromAuthState } from '../lib/enrollAuth'
 
 export default function SignupPage() {
   const { setUser } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -75,7 +77,11 @@ export default function SignupPage() {
       if (res.devCode) setDemoEmailCode(res.devCode)
       setStep(2)
       setCooldown(60)
-      setSuccessMsg('Account registered! Enter the 6-digit verification code sent to your email.')
+      if (res.emailSent === false) {
+        setError(res.message || 'Account created, but the verification email could not be sent. Tap Resend code.')
+      } else {
+        setSuccessMsg(res.message || 'Account registered! Enter the 6-digit verification code sent to your email.')
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -111,7 +117,8 @@ export default function SignupPage() {
       }
       setSuccessMsg('Email verified successfully! Logging you in...')
       setTimeout(() => {
-        navigate('/', { replace: true })
+        const next = pathFromAuthState(location)
+        navigate(next, { replace: true, state: location.state?.enroll ? { enroll: true } : undefined })
       }, 1000)
     } catch (err) {
       setError(err.message)
@@ -346,7 +353,7 @@ export default function SignupPage() {
         {/* Footer Redirect Links */}
         <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem', color: '#64748b' }}>
           Already have an account?{' '}
-          <Link to="/login" style={{ color: '#0074e4', fontWeight: 700, textDecoration: 'underline' }}>
+          <Link to="/login" state={location.state} style={{ color: '#0074e4', fontWeight: 700, textDecoration: 'underline' }}>
             Log In
           </Link>
         </div>

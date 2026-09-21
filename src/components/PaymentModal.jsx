@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { formatCoursePrice } from '../data/siteData'
 import { loadRazorpay } from '../lib/razorpayClient'
 import { api } from '../lib/api'
+import { signupRedirectState } from '../lib/enrollAuth'
 
 const inputStyle = {
   width: '100%',
@@ -23,7 +25,18 @@ function safeHtml(str) {
 }
 
 export default function PaymentModal({ course, batch, onClose }) {
-  const { currency, currencySymbol, user, fxTick } = useApp()
+  const { currency, currencySymbol, user, fxTick, loadingAuth } = useApp()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (loadingAuth) return
+    if (!user) {
+      onClose?.()
+      navigate('/signup', { state: signupRedirectState(location) })
+    }
+  }, [user, loadingAuth])
+
   const displayPrice = formatCoursePrice(course, currency, currencySymbol)
 
   const [formData, setFormData] = useState({
@@ -159,6 +172,8 @@ export default function PaymentModal({ course, batch, onClose }) {
     win.document.write(html)
     win.document.close()
   }
+
+  if (loadingAuth || !user) return null
 
   return (
     <div className="pay-overlay" onClick={onClose} role="presentation">
