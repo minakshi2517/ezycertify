@@ -1146,7 +1146,7 @@ export const courses = [
     duration: '35 hours',
     rating: 4.8,
     students: 0,
-    priceUSD: 500,
+    priceUSD: 48000 / 83.5,
     upcoming: []
   }
 ]
