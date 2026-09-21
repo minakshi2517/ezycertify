@@ -1,0 +1,9 @@
+PassengerEnabled on
+PassengerAppType node
+PassengerStartupFile server.js
+PassengerFriendlyErrorPages on
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^api/ - [L]
+</IfModule>

@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { courses, courseCategories, partnerLogos } from '../data/siteData'
+import { courseCategories, partnerLogos } from '../data/siteData'
 import { CourseCard } from '../components/CoursesSection'
 import { useApp } from '../context/AppContext'
 import PaymentModal from '../components/PaymentModal'
 
 export default function CoursesPage() {
-  const { tr } = useApp()
+  const { tr, catalogCourses } = useApp()
+  const courses = catalogCourses
   const [activeCategory, setActiveCategory] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('popular')
@@ -30,7 +31,7 @@ export default function CoursesPage() {
     }
 
     return result
-  }, [activeCategory, searchTerm, sortBy])
+  }, [activeCategory, searchTerm, sortBy, courses])
 
   return (
     <div className="page-wrapper" style={{ paddingTop: 'calc(var(--header-h) + 1rem)', background: '#f8fafc', minHeight: '100vh', paddingBottom: '5rem' }}>

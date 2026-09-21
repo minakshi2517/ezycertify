@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { courses, partnerLogos } from '../data/siteData'
+import { partnerLogos } from '../data/siteData'
 import PaymentModal from './PaymentModal'
 
 export function CourseCard({ course, onEnroll }) {
@@ -52,7 +52,8 @@ export function CourseCard({ course, onEnroll }) {
 }
 
 export default function CoursesSection({ limit = 8 }) {
-  const { t } = useApp()
+  const { t, catalogCourses } = useApp()
+  const courses = catalogCourses
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProvider, setSelectedProvider] = useState('all')
   const [selectedCourse, setSelectedCourse] = useState(null)

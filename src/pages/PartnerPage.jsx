@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { partnerLogos, courses } from '../data/siteData'
+import { partnerLogos } from '../data/siteData'
 import { CourseCard } from '../components/CoursesSection'
 import { useApp } from '../context/AppContext'
 import PaymentModal from '../components/PaymentModal'
 
 export default function PartnerPage() {
   const { providerId } = useParams()
-  const { tr } = useApp()
+  const { tr, catalogCourses } = useApp()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [sortBy, setSortBy] = useState('popular')
@@ -28,7 +28,7 @@ export default function PartnerPage() {
 
   // Filter courses for this provider
   const providerCourses = useMemo(() => {
-    let result = courses.filter((c) => {
+    let result = catalogCourses.filter((c) => {
       if (!providerId) return true
       const pId = providerId.toLowerCase()
       const cProv = (c.providerId || '').toLowerCase()
@@ -73,7 +73,7 @@ export default function PartnerPage() {
     }
 
     return result
-  }, [providerId, searchQuery, selectedCategory, sortBy])
+  }, [providerId, searchQuery, selectedCategory, sortBy, catalogCourses])
 
   return (
     <div className="page-wrapper" style={{ paddingTop: 'calc(var(--header-h) + 1.5rem)', background: '#f8fafc', minHeight: '100vh' }}>

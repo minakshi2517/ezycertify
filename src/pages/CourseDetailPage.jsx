@@ -6,8 +6,8 @@ import PaymentModal from '../components/PaymentModal'
 
 export default function CourseDetailPage() {
   const { slug } = useParams()
-  const { currency, currencySymbol } = useApp()
-  const course = getCourseBySlug(slug)
+  const { currency, currencySymbol, catalogCourses } = useApp()
+  const course = catalogCourses.find((item) => item.slug === slug) || getCourseBySlug(slug)
 
   const [showModal, setShowModal] = useState(false)
   const [selectedBatch, setSelectedBatch] = useState('')

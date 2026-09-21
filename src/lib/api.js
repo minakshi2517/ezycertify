@@ -1,13 +1,34 @@
-﻿export function apiUrl(path) {
+﻿const TOKEN_KEY = 'ezycertify_token'
+
+export function apiUrl(path) {
   const base = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
   return `${base}${path.startsWith('/') ? path : `/${path}`}`
 }
 
+export function persistAuthToken(token) {
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token)
+    else localStorage.removeItem(TOKEN_KEY)
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function getAuthToken() {
+  try {
+    return localStorage.getItem(TOKEN_KEY)
+  } catch {
+    return null
+  }
+}
+
 async function request(path, options = {}) {
+  const token = getAuthToken()
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
   }
+  if (token) headers.Authorization = `Bearer ${token}`
 
   const config = {
     ...options,
@@ -31,6 +52,8 @@ async function request(path, options = {}) {
     console.error(`[API Non-JSON Response from ${path}]:`, res.status, text)
     data = { error: text ? `Server Error (${res.status}): ${text.slice(0, 120)}` : `Server returned status ${res.status}` }
   }
+
+  if (data?.token) persistAuthToken(data.token)
 
   if (!res.ok) {
     throw new Error(data?.error || `Request failed with status ${res.status}`)
@@ -56,7 +79,13 @@ export const api = {
     forgotPassword: (data) => api.post('/api/auth/forgot-password', data),
     resetPassword: (data) => api.post('/api/auth/reset-password', data),
     me: () => api.get('/api/auth/me'),
-    logout: () => api.post('/api/auth/logout'),
+    logout: async () => {
+      try {
+        return await api.post('/api/auth/logout')
+      } finally {
+        persistAuthToken(null)
+      }
+    },
   },
 
   payments: {

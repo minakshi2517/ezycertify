@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
@@ -7,16 +8,16 @@ import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+dotenv.config({ path: path.join(__dirname, '..', '.env') })
 dotenv.config()
 
-import './db/database.js'
+import { db } from './db/database.js'
 import authRoutes from './routes/authRoutes.js'
 import paymentRoutes from './routes/paymentRoutes.js'
 import courseRoutes from './routes/courseRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const PORT = Number(process.env.PORT || 5000)
 const distDir = path.join(__dirname, '..', 'dist')
 
 const ALLOWED_ORIGINS = [
@@ -29,33 +30,29 @@ const ALLOWED_ORIGINS = [
 ]
 
 const app = express()
+app.set('trust proxy', 1)
 
-// Security HTTP Headers
 app.use(
   helmet({
-    contentSecurityPolicy: false, // Allows Razorpay and external fonts/assets to load smoothly
+    contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
   })
 )
 
-// CORS Configuration with Credentials support
 app.use(
   cors({
     origin: (origin, cb) => {
       if (!origin || ALLOWED_ORIGINS.includes(origin) || process.env.NODE_ENV !== 'production') {
         return cb(null, true)
       }
-      cb(null, true) // Permissive for subdomains and custom domains
+      cb(null, true)
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   })
 )
 
-// Cookie Parser
 app.use(cookieParser(process.env.COOKIE_SECRET || 'ezycertify_cookie_secret'))
-
-// JSON Body Parser with raw body preservation for Webhooks
 app.use(
   express.json({
     limit: '256kb',
@@ -66,17 +63,30 @@ app.use(
 )
 app.use(express.urlencoded({ extended: true, limit: '256kb' }))
 
-// Mount Modular API Routes
+app.get('/api/health', (req, res) => {
+  const smtpReady = Boolean(
+    process.env.SMTP_HOST &&
+      process.env.SMTP_USER &&
+      process.env.SMTP_PASS &&
+      !String(process.env.SMTP_PASS).includes('xxxxxxxx') &&
+      !String(process.env.SMTP_PASS).includes('YourHostinger')
+  )
+  res.json({
+    ok: true,
+    service: 'ezycertify',
+    smtp: smtpReady,
+    courses: (db.tables.courses || []).length,
+    users: (db.tables.users || []).length,
+  })
+})
+
 app.use('/api/auth', authRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api', paymentRoutes)
 app.use('/api', courseRoutes)
 
-// In production / standalone hosting (Hostinger, VPS), serve static assets and SPA catch-all
 if (process.env.NODE_ENV === 'production' || fs.existsSync(distDir)) {
   app.use(express.static(distDir))
-
-  // SPA Catch-All
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next()
     const indexPath = path.join(distDir, 'index.html')
@@ -88,7 +98,6 @@ if (process.env.NODE_ENV === 'production' || fs.existsSync(distDir)) {
   })
 }
 
-// Centralized Error Handler
 app.use((err, req, res, next) => {
   console.error('[Server Error]:', err.message)
   const statusCode = err.status || 500

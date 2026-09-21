@@ -89,7 +89,11 @@ router.post('/signup', authLimiter, async (req, res) => {
     const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`
     const verifyLink = `${appUrl}/verify-email?token=${emailVer.rawCode}&email=${encodeURIComponent(user.email)}`
     
-    await sendVerificationEmail(user.email, user.name, emailVer.rawCode, verifyLink)
+    try {
+      await sendVerificationEmail(user.email, user.name, emailVer.rawCode, verifyLink)
+    } catch (mailErr) {
+      console.error('[Signup] Account created but email failed:', mailErr.message)
+    }
 
     const smtpReady = isSmtpConfigured()
 

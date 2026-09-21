@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { courses, PHONE_NUMBER, WHATSAPP_LINK } from '../data/siteData'
+import { PHONE_NUMBER, WHATSAPP_LINK } from '../data/siteData'
 
 export default function Header() {
-  const { language, setLanguage, languages, currency, user, signOut, t } = useApp()
+  const { language, setLanguage, languages, currency, user, signOut, t, catalogCourses } = useApp()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -65,11 +65,11 @@ export default function Header() {
     { id: 'nppe', label: 'NPPE', desc: 'NPPE Exam Preparation', logo: '/partners/nppe.svg' },
   ]
 
-  const activeCategoryCourses = courses.filter((c) => c.providerId === activeTab)
+  const activeCategoryCourses = catalogCourses.filter((c) => c.providerId === activeTab)
   const activeProvider = providerCategories.find((p) => p.id === activeTab) || providerCategories[0]
 
   // Live search filtering
-  const searchResults = courses.filter((c) => {
+  const searchResults = catalogCourses.filter((c) => {
     if (!searchQuery.trim()) return true
     const q = searchQuery.toLowerCase().trim()
     return (

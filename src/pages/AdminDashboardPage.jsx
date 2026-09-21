@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext'
 import { api } from '../lib/api'
 
 export default function AdminDashboardPage() {
-  const { user, loadingAuth } = useApp()
+  const { user, loadingAuth, refreshCatalog } = useApp()
   const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState('overview') // 'overview' | 'users' | 'courses' | 'payments' | 'enrollments'
@@ -23,12 +23,15 @@ export default function AdminDashboardPage() {
   const [newCourse, setNewCourse] = useState({
     title: '',
     short_title: '',
-    provider_id: 'Ezycertify',
+    provider_id: 'ezycertify',
     category: 'Project Management',
     price_usd: '499',
     duration: '35 Hours',
     description: '',
-    badge: 'Popular'
+    badge: 'Popular',
+    image: '',
+    highlights: '',
+    skills: '',
   })
 
   useEffect(() => {
@@ -98,14 +101,18 @@ export default function AdminDashboardPage() {
         setNewCourse({
           title: '',
           short_title: '',
-          provider_id: 'Ezycertify',
+          provider_id: 'ezycertify',
           category: 'Project Management',
           price_usd: '499',
           duration: '35 Hours',
           description: '',
-          badge: 'Popular'
+          badge: 'Popular',
+          image: '',
+          highlights: '',
+          skills: '',
         })
         loadAllAdminData()
+        refreshCatalog()
       }
     } catch (err) {
       alert(err.message || 'Failed to create course.')
@@ -124,6 +131,7 @@ export default function AdminDashboardPage() {
       await api.admin.deleteCourse(id)
       setActionSuccess(`Course "${title}" deleted successfully.`)
       setCoursesList((prev) => prev.filter((c) => c.id !== id))
+      refreshCatalog()
     } catch (err) {
       alert(err.message || 'Failed to delete course.')
     }
@@ -651,6 +659,39 @@ export default function AdminDashboardPage() {
                   placeholder="Comprehensive professional certification training with live projects."
                   value={newCourse.description}
                   onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.95rem', resize: 'vertical' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '0.35rem' }}>Cover Image URL</label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={newCourse.image}
+                  onChange={(e) => setNewCourse({ ...newCourse, image: e.target.value })}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.95rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '0.35rem' }}>Highlights (one per line)</label>
+                <textarea
+                  rows="3"
+                  placeholder={'Complete exam preparation\nPractice questions\nMentor support'}
+                  value={newCourse.highlights}
+                  onChange={(e) => setNewCourse({ ...newCourse, highlights: e.target.value })}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.95rem', resize: 'vertical' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '0.35rem' }}>Skills (one per line)</label>
+                <textarea
+                  rows="2"
+                  placeholder={'Professional Ethics\nProfessional Practice'}
+                  value={newCourse.skills}
+                  onChange={(e) => setNewCourse({ ...newCourse, skills: e.target.value })}
                   style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.95rem', resize: 'vertical' }}
                 />
               </div>

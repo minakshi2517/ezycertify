@@ -35,9 +35,6 @@ export async function sendEmail({ to, subject, html, text, logHeader = 'EMAIL' }
       return { success: true, messageId: info.messageId }
     } catch (err) {
       console.error(`[Email Error] Failed sending to ${to}:`, err.message)
-      if (process.env.NODE_ENV === 'production' && !process.env.SMTP_PASS?.includes('xxxxxxxx')) {
-        throw new Error(`Email delivery failed: ${err.message}`)
-      }
       console.log(`[Email Dev Fallback] Falling back to console logger...`)
     }
   }

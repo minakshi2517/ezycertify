@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import app from './server/index.js'
 
 const PORT = Number(process.env.PORT || 5000)

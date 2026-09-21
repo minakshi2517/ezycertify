@@ -3,6 +3,14 @@ import { db } from '../db/database.js'
 import { getCourseById } from '../../src/data/siteData.js'
 import { getPayable } from '../../src/lib/pricing.js'
 import { sendEnrollmentEmail } from './emailService.js'
+import { normalizeCourse } from '../../src/lib/courseCatalog.js'
+
+function resolveCourse(courseId) {
+  const staticCourse = getCourseById(courseId)
+  if (staticCourse) return staticCourse
+  const row = db.prepare('SELECT * FROM courses WHERE id = ?').get(courseId)
+  return row ? normalizeCourse(row) : null
+}
 
 export function getRazorpayKeys() {
   const keyId = String(process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || '').trim()
@@ -38,7 +46,7 @@ export async function createRazorpayOrder({ courseId, student, batch, userId = n
     throw new Error('Payment gateway is unconfigured. Please add your Razorpay API keys.')
   }
 
-  const course = getCourseById(courseId) || getCourseById('pmp')
+  const course = resolveCourse(courseId)
   if (!course) {
     throw new Error('Course not found in catalog.')
   }
@@ -139,7 +147,7 @@ export function verifyAndEnrollPayment({ orderId, paymentId, signature, courseId
 
 // Idempotent Enrollment Processor
 export function finalizeEnrollment({ orderId, paymentId, signature, courseId, student, batch, userId = null, status = 'captured', rawPayload = null }) {
-  const course = getCourseById(courseId) || getCourseById('pmp')
+  const course = resolveCourse(courseId)
   const validCourseId = course?.id || 'pmp'
   const payable = getPayable(course?.priceUSD || 499)
   const now = new Date().toISOString()

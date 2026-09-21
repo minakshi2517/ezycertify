@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { US_ADDRESS, NIGERIA_ADDRESS, PHONE_NUMBER, EMAIL_ADDRESS, courses, partnerLogos } from '../data/siteData'
+import { US_ADDRESS, NIGERIA_ADDRESS, PHONE_NUMBER, EMAIL_ADDRESS, partnerLogos } from '../data/siteData'
 import { globalCountryCodes } from '../data/countryData'
+import { useApp } from '../context/AppContext'
 
 export default function ContactPage() {
+  const { catalogCourses } = useApp()
+  const courses = catalogCourses
   const [submitted, setSubmitted] = useState(false)
   const [form, setForm] = useState({
     name: '',

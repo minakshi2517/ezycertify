@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
-import { languages } from '../data/siteData'
+import { languages, courses as staticCourses } from '../data/siteData'
 import { getTranslation, translateText } from '../data/translations'
-import { api } from '../lib/api'
+import { api, persistAuthToken } from '../lib/api'
+import { mergeCourseCatalog } from '../lib/courseCatalog'
 
 const AppContext = createContext(null)
 
@@ -12,6 +13,7 @@ export function AppProvider({ children }) {
 
   const [user, setUser] = useState(null)
   const [loadingAuth, setLoadingAuth] = useState(true)
+  const [catalogCourses, setCatalogCourses] = useState(staticCourses)
 
   const langConfig = useMemo(
     () => languages.find((l) => l.code === language) || languages[0],
@@ -77,12 +79,30 @@ export function AppProvider({ children }) {
     refreshUser()
   }, [refreshUser])
 
+  const refreshCatalog = useCallback(() => {
+    api.courses
+      .getAll()
+      .then((res) => {
+        if (Array.isArray(res?.courses)) {
+          setCatalogCourses(mergeCourseCatalog(staticCourses, res.courses))
+        }
+      })
+      .catch(() => {
+        setCatalogCourses(staticCourses)
+      })
+  }, [])
+
+  useEffect(() => {
+    refreshCatalog()
+  }, [refreshCatalog])
+
   const signOut = useCallback(async () => {
     try {
       await api.auth.logout()
     } catch (err) {
       console.error('Sign out error:', err)
     } finally {
+      persistAuthToken(null)
       setUser(null)
       window.location.href = '/'
     }
@@ -102,6 +122,8 @@ export function AppProvider({ children }) {
     loadingAuth,
     refreshUser,
     signOut,
+    catalogCourses,
+    refreshCatalog,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

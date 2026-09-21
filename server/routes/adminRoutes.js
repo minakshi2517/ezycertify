@@ -93,7 +93,7 @@ router.get('/courses', (req, res) => {
 // 4. CREATE NEW COURSE (Admin)
 router.post('/courses', (req, res) => {
   try {
-    const { title, short_title, provider_id, category, price_usd, duration, description, badge } = req.body
+    const { title, short_title, provider_id, category, price_usd, duration, description, badge, image, highlights, skills } = req.body
     if (!title || !title.trim()) {
       return res.status(400).json({ error: 'Course title is required.' })
     }
@@ -101,20 +101,36 @@ router.post('/courses', (req, res) => {
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     const id = `course_${Date.now()}`
     const now = new Date().toISOString()
+    const highlightList = Array.isArray(highlights)
+      ? highlights
+      : String(highlights || '')
+          .split('\n')
+          .map((item) => item.replace(/^[-•]\s*/, '').trim())
+          .filter(Boolean)
+    const skillList = Array.isArray(skills)
+      ? skills
+      : String(skills || '')
+          .split('\n')
+          .map((item) => item.replace(/^[-•]\s*/, '').trim())
+          .filter(Boolean)
 
     db.prepare(`
-      INSERT INTO courses (id, slug, title, short_title, provider_id, category, badge, description, price_usd, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)
+      INSERT INTO courses (id, slug, title, short_title, provider_id, category, badge, description, price_usd, duration, image, highlights, skills, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)
     `).run(
       id,
       slug,
       title.trim(),
       short_title || title.trim(),
-      provider_id || 'Ezycertify',
-      category || 'Certifications',
+      provider_id || 'ezycertify',
+      category || 'Project Management',
       badge || 'Popular',
       description || '',
       Number(price_usd) || 499,
+      duration || 'Live Virtual',
+      image || 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80',
+      JSON.stringify(highlightList.length ? highlightList : ['Live virtual training', 'Exam preparation support']),
+      JSON.stringify(skillList.length ? skillList : ['Professional Practice']),
       now,
       now
     )

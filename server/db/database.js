@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import path from 'path'
 import fs from 'fs'
 import bcrypt from 'bcryptjs'
@@ -247,6 +248,20 @@ class PureDatabase {
       return this.applyLimitOffset(sql, result, params)
     }
 
+    // 3b. Admin courses list with enrollment counts
+    if (sql.includes('FROM courses c')) {
+      const courseRows = this.tables.courses || []
+      const enrollments = this.tables.enrollments || []
+      const result = courseRows.map((c) => ({
+        ...c,
+        enrolled_students: enrollments.filter(
+          (e) => e.course_id === c.id && (e.payment_status === 'paid' || e.access_status === 'granted')
+        ).length,
+      }))
+      result.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+      return result
+    }
+
     // 4. Payments with course & user join (Admin Dashboard)
     if (sql.includes('FROM payments p')) {
       const payments = this.tables.payments || []
@@ -456,27 +471,28 @@ function seedCourses() {
 function seedAdmin() {
   const adminEmail = (process.env.ADMIN_DEFAULT_EMAIL || 'admin@ezycertify.com').toLowerCase().trim()
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(adminEmail)
-  if (!existing) {
-    const adminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'Admin@Ezycertify2026!'
-    const salt = bcrypt.genSaltSync(12)
-    const passwordHash = bcrypt.hashSync(adminPassword, salt)
-    const now = new Date().toISOString()
-    const adminId = 'user_admin_001'
+  const hasAdminRole = (db.tables.users || []).some((user) => user.role === 'admin')
+  if (existing || hasAdminRole) return
 
-    db.prepare(`
-      INSERT INTO users (id, name, email, phone, password_hash, email_verified, phone_verified, two_factor_enabled, role, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, 1, 1, 0, 'admin', ?, ?)
-    `).run(
-      adminId,
-      process.env.ADMIN_DEFAULT_NAME || 'Ezycertify Administrator',
-      adminEmail,
-      process.env.ADMIN_DEFAULT_PHONE || '+919876543210',
-      passwordHash,
-      now,
-      now
-    )
-    console.log(`[Database] Created default administrator account: ${adminEmail}`)
-  }
+  const adminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'Admin@Ezycertify2026!'
+  const salt = bcrypt.genSaltSync(12)
+  const passwordHash = bcrypt.hashSync(adminPassword, salt)
+  const now = new Date().toISOString()
+  const adminId = 'user_admin_001'
+
+  db.prepare(`
+    INSERT INTO users (id, name, email, phone, password_hash, email_verified, phone_verified, two_factor_enabled, role, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, 1, 1, 0, 'admin', ?, ?)
+  `).run(
+    adminId,
+    process.env.ADMIN_DEFAULT_NAME || 'Ezycertify Administrator',
+    adminEmail,
+    process.env.ADMIN_DEFAULT_PHONE || '+919876543210',
+    passwordHash,
+    now,
+    now
+  )
+  console.log(`[Database] Created default administrator account: ${adminEmail}`)
 }
 
 // Auto-run on load
