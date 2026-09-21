@@ -62,6 +62,7 @@ export default function Header() {
     { id: 'axelos', label: 'AXELOS / ITIL® / PRINCE2®', desc: 'ITIL® 4 Foundation, PRINCE2®', logo: '/partners/itil.svg' },
     { id: 'isaca', label: 'ISACA', desc: 'CISA®, CISM®, CRISC®, CGEIT®', logo: '/partners/isaca.svg' },
     { id: 'devops', label: 'DevOps Institute', desc: 'DevOps Leader, SRE, DevSecOps', logo: '/partners/devops.svg' },
+    { id: 'nppe', label: 'NPPE', desc: 'NPPE Exam Preparation', logo: '/partners/nppe.svg' },
   ]
 
   const activeCategoryCourses = courses.filter((c) => c.providerId === activeTab)

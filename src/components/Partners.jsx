@@ -16,6 +16,7 @@ export default function Partners() {
     else if (lowerName.includes('microsoft')) e.target.src = '/partners/microsoft.svg'
     else if (lowerName.includes('isaca')) e.target.src = '/partners/isaca.svg'
     else if (lowerName.includes('devops')) e.target.src = '/partners/devops.svg'
+    else if (lowerName.includes('nppe')) e.target.src = '/partners/nppe.svg'
     else e.target.src = '/partners/pmi.svg'
   }
 

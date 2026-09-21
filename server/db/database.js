@@ -423,31 +423,33 @@ export function initDatabase() {
 }
 
 function seedCourses() {
-  const count = db.prepare('SELECT COUNT(*) as count FROM courses').get().count
-  if (count === 0 && Array.isArray(courses)) {
-    const insert = db.prepare(`
-      INSERT INTO courses (id, slug, title, short_title, provider_id, category, badge, description, price_usd, status, created_at, updated_at)
-      VALUES (@id, @slug, @title, @shortTitle, @providerId, @category, @badge, @description, @priceUSD, 'active', @now, @now)
-    `)
-    const insertMany = db.transaction((list) => {
-      const now = new Date().toISOString()
-      for (const item of list) {
-        insert.run({
-          id: item.id,
-          slug: item.slug,
-          title: item.title,
-          shortTitle: item.shortTitle || item.title,
-          providerId: item.providerId,
-          category: item.category,
-          badge: item.badge || '',
-          description: item.description || '',
-          priceUSD: item.priceUSD || 499,
-          now,
-        })
-      }
+  if (!Array.isArray(courses) || courses.length === 0) return
+
+  const insert = db.prepare(`
+    INSERT INTO courses (id, slug, title, short_title, provider_id, category, badge, description, price_usd, status, created_at, updated_at)
+    VALUES (@id, @slug, @title, @shortTitle, @providerId, @category, @badge, @description, @priceUSD, 'active', @now, @now)
+  `)
+  const now = new Date().toISOString()
+  let added = 0
+  for (const item of courses) {
+    const existing = db.prepare('SELECT id FROM courses WHERE id = ?').get(item.id)
+    if (existing) continue
+    insert.run({
+      id: item.id,
+      slug: item.slug,
+      title: item.title,
+      shortTitle: item.shortTitle || item.title,
+      providerId: item.providerId,
+      category: item.category,
+      badge: item.badge || '',
+      description: item.description || '',
+      priceUSD: item.priceUSD || 499,
+      now,
     })
-    insertMany(courses)
-    console.log(`[Database] Seeded ${courses.length} courses successfully.`)
+    added += 1
+  }
+  if (added > 0) {
+    console.log(`[Database] Seeded ${added} courses successfully.`)
   }
 }
 

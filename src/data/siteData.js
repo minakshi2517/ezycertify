@@ -102,6 +102,7 @@ export const partnerLogos = [
   { id: 'axelos', name: 'AXELOS / ITIL®', logo: '/partners/itil.svg', badgeText: 'ITIL Service Management', desc: 'Global ITSM framework certifications including ITIL® 4 Foundation, ITIL® Managing Professional, and PRINCE2® Project Management.' },
   { id: 'isaca', name: 'ISACA', logo: '/partners/isaca.svg', badgeText: 'Cybersecurity & Governance', desc: 'Leading IT governance, cybersecurity audit, and risk management credentials including CISA® and CISM®.' },
   { id: 'devops', name: 'DevOps Institute', logo: '/partners/devops.svg', badgeText: 'DevOps & SRE Certification', desc: 'Continuous delivery, Site Reliability Engineering (SRE), and DevOps leadership certifications.' },
+  { id: 'nppe', name: 'NPPE', logo: '/partners/nppe.svg', badgeText: 'NPPE Exam Preparation', desc: 'National Professional Practice Examination preparation covering ethics, professionalism, law, regulation, and professional practice.' },
 ]
 
 export const testimonials = [
@@ -144,7 +145,7 @@ export const courseCategories = [
   'Cloud & ITIL',
 ]
 
-// 64 High-Quality Accredited Courses (8 Courses per Provider x 8 Providers)
+// Accredited certification catalog (8 providers + NPPE exam preparation)
 export const courses = [
   // 1. PMI (Project Management Institute) - 8 Courses
   {
@@ -1120,6 +1121,33 @@ export const courses = [
     skills: ['DevOps Engineering', 'GitOps & Ansible Automation', 'Monitoring Toolchains'],
     duration: '16 Hours', rating: 4.8, students: 730, priceUSD: 449,
     upcoming: [{ date: 'Nov 02 - Nov 03, 2026', time: 'Weekend (9:00 AM - 5:00 PM IST)', mode: 'Live Virtual' }]
+  },
+  {
+    id: 'nppe',
+    slug: 'nppe-exam-preparation',
+    title: 'NPPE',
+    shortTitle: 'NPPE Exam Preparation',
+    providerId: 'nppe',
+    category: 'Project Management',
+    badge: 'NPPE Preparation',
+    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80',
+    description: 'Comprehensive preparation for the National Professional Practice Examination covering ethics, professionalism, law, regulation, and professional practice.',
+    highlights: [
+      'Complete NPPE Exam Preparation',
+      'Professionalism & Ethics',
+      'Law, Regulation & Professional Practice',
+      'Practice Questions & Exam Preparation Support'
+    ],
+    skills: [
+      'Professional Ethics',
+      'Professional Practice',
+      'Law & Regulation'
+    ],
+    duration: '35 hours',
+    rating: 4.8,
+    students: 0,
+    priceUSD: 500,
+    upcoming: []
   }
 ]
 
