@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
-import { languages, courses as staticCourses } from '../data/siteData'
+import { languages, courses as staticCourses, setLiveExchangeRates } from '../data/siteData'
 import { getTranslation, translateText } from '../data/translations'
 import { api, persistAuthToken } from '../lib/api'
 import { mergeCourseCatalog } from '../lib/courseCatalog'
@@ -14,6 +14,7 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loadingAuth, setLoadingAuth] = useState(true)
   const [catalogCourses, setCatalogCourses] = useState(staticCourses)
+  const [fxTick, setFxTick] = useState(0)
 
   const langConfig = useMemo(
     () => languages.find((l) => l.code === language) || languages[0],
@@ -96,6 +97,18 @@ export function AppProvider({ children }) {
     refreshCatalog()
   }, [refreshCatalog])
 
+  useEffect(() => {
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.rates) {
+          setLiveExchangeRates(data.rates)
+          setFxTick((n) => n + 1)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   const signOut = useCallback(async () => {
     try {
       await api.auth.logout()
@@ -124,6 +137,7 @@ export function AppProvider({ children }) {
     signOut,
     catalogCourses,
     refreshCatalog,
+    fxTick,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

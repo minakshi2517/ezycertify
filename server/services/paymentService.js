@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { db } from '../db/database.js'
 import { getCourseById } from '../../src/data/siteData.js'
-import { getPayable } from '../../src/lib/pricing.js'
+import { getPayable, refreshExchangeRates } from '../../src/lib/pricing.js'
 import { sendEnrollmentEmail } from './emailService.js'
 import { normalizeCourse } from '../../src/lib/courseCatalog.js'
 
@@ -51,6 +51,7 @@ export async function createRazorpayOrder({ courseId, student, batch, userId = n
     throw new Error('Course not found in catalog.')
   }
 
+  await refreshExchangeRates()
   const payable = getPayable(course)
   const receipt = `ezy_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`.slice(0, 40)
 

@@ -51,23 +51,33 @@ export const languages = [
 
 export const exchangeRates = {
   USD: 1,
-  GBP: 0.79,
-  EUR: 0.92,
-  INR: 83.5,
+  GBP: 0.75,
+  EUR: 0.86,
+  INR: 95.73,
   AED: 3.67,
-  BRL: 4.97,
+  BRL: 5.4,
   RUB: 91.2,
-  CNY: 7.23,
+  CNY: 7.12,
   TWD: 31.5,
-  JPY: 154.8,
-  KRW: 1375,
-  PLN: 4.02,
-  TRY: 32.4,
-  SEK: 10.8,
-  VND: 25400,
-  IDR: 16100,
-  MYR: 4.75,
-  THB: 36.8,
+  JPY: 147,
+  KRW: 1390,
+  PLN: 3.7,
+  TRY: 41,
+  SEK: 9.5,
+  VND: 26300,
+  IDR: 16400,
+  MYR: 4.2,
+  THB: 32.5,
+}
+
+let liveExchangeRates = { ...exchangeRates }
+
+export function setLiveExchangeRates(rates = {}) {
+  liveExchangeRates = { ...exchangeRates, ...rates, USD: 1 }
+}
+
+export function getExchangeRates() {
+  return liveExchangeRates
 }
 
 export const whatsappPresets = [
@@ -1147,7 +1157,6 @@ export const courses = [
     rating: 4.8,
     students: 0,
     priceINR: 48000,
-    priceCurrency: 'INR',
     upcoming: []
   }
 ]
@@ -1220,24 +1229,25 @@ export const sampleCertificates = [
 
 export function getCourseAmount(course, currencyCode = 'USD') {
   if (!course) return 0
-  const inrRate = exchangeRates.INR || 83.5
+  const rates = getExchangeRates()
+  const inrRate = rates.INR || 95.73
   const listedInr = course.priceINR != null && course.priceINR !== '' ? Number(course.priceINR) : null
   const listedUsd = course.priceUSD != null && course.priceUSD !== '' ? Number(course.priceUSD) : null
-  const inrPriced = course.priceCurrency === 'INR' || (listedInr != null && (listedUsd == null || Number.isNaN(listedUsd)))
 
-  if (inrPriced && listedInr != null) {
+  if (listedInr != null && !Number.isNaN(listedInr) && (listedUsd == null || Number.isNaN(listedUsd))) {
     if (currencyCode === 'INR') return Math.round(listedInr)
     const usd = listedInr / inrRate
-    return Math.round(usd * (exchangeRates[currencyCode] || 1))
+    return Math.round(usd * (rates[currencyCode] || 1))
   }
 
   const usd = listedUsd || 0
   if (currencyCode === 'USD') return Math.round(usd)
-  return Math.round(usd * (exchangeRates[currencyCode] || 1))
+  return Math.round(usd * (rates[currencyCode] || 1))
 }
 
 export function formatPrice(priceUSD, currencyCode = 'USD', symbol = '$') {
-  const rate = exchangeRates[currencyCode] || 1
+  const rates = getExchangeRates()
+  const rate = rates[currencyCode] || 1
   const converted = Math.round(Number(priceUSD || 0) * rate)
 
   if (currencyCode === 'INR') {
@@ -1247,12 +1257,6 @@ export function formatPrice(priceUSD, currencyCode = 'USD', symbol = '$') {
 }
 
 export function formatCoursePrice(course, currencyCode = 'USD', symbol = '$') {
-  const inrPriced = course?.priceCurrency === 'INR' || (course?.priceINR != null && course?.priceUSD == null)
-  if (inrPriced) {
-    const amount = Math.round(Number(course.priceINR) || 0)
-    return `₹${amount.toLocaleString('en-IN')}`
-  }
-
   const amount = getCourseAmount(course, currencyCode)
   const displaySymbol = currencyCode === 'INR' ? '₹' : symbol
   if (currencyCode === 'INR') {
