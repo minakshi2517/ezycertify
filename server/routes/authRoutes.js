@@ -21,6 +21,7 @@ import {
   send2FAEmail,
   sendPasswordResetEmail,
 } from '../services/emailService.js'
+import { getSmtpConfig } from '../services/smtpConfig.js'
 import rateLimit from 'express-rate-limit'
 
 const router = Router()
@@ -43,8 +44,7 @@ const otpLimiter = rateLimit({
 })
 
 function isSmtpConfigured() {
-  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS
-  return Boolean(pass && !pass.includes('xxxxxxxx') && !pass.includes('your_'))
+  return getSmtpConfig().ready
 }
 
 // 1. SIGNUP (Email-based)

@@ -1,32 +1,31 @@
 import nodemailer from 'nodemailer'
+import { getSmtpConfig } from './smtpConfig.js'
 
 let transporter = null
 
 function getTransporter() {
   if (transporter) return transporter
-  const host = process.env.SMTP_HOST
-  const user = process.env.SMTP_USER
-  const pass = process.env.SMTP_PASS
+  const smtp = getSmtpConfig()
+  if (!smtp.ready) return null
 
-  if (host && user && pass && !pass.includes('xxxxxxxx') && !user.includes('xxxxxxxx')) {
-    try {
-      transporter = nodemailer.createTransport({
-        host,
-        port: Number(process.env.SMTP_PORT || 587),
-        secure: process.env.SMTP_SECURE === 'true',
-        auth: { user, pass },
-      })
-    } catch (e) {
-      console.warn('[Email Transporter Init Error]:', e.message)
-      transporter = null
-    }
+  try {
+    transporter = nodemailer.createTransport({
+      host: smtp.host,
+      port: smtp.port,
+      secure: smtp.secure,
+      auth: { user: smtp.user, pass: smtp.pass },
+    })
+  } catch (e) {
+    console.warn('[Email Transporter Init Error]:', e.message)
+    transporter = null
   }
   return transporter
 }
 
 export async function sendEmail({ to, subject, html, text, logHeader = 'EMAIL' }) {
   const mailer = getTransporter()
-  const from = process.env.EMAIL_FROM || '"Ezycertify" <support@ezycertify.com>'
+  const smtp = getSmtpConfig()
+  const from = smtp.from || '"Ezycertify" <support@ezycertify.com>'
 
   if (mailer) {
     try {

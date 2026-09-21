@@ -13,6 +13,7 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') })
 dotenv.config()
 
 import { db } from './db/database.js'
+import { getSmtpConfig } from './services/smtpConfig.js'
 import authRoutes from './routes/authRoutes.js'
 import paymentRoutes from './routes/paymentRoutes.js'
 import courseRoutes from './routes/courseRoutes.js'
@@ -64,17 +65,13 @@ app.use(
 app.use(express.urlencoded({ extended: true, limit: '256kb' }))
 
 app.get('/api/health', (req, res) => {
-  const smtpReady = Boolean(
-    process.env.SMTP_HOST &&
-      process.env.SMTP_USER &&
-      process.env.SMTP_PASS &&
-      !String(process.env.SMTP_PASS).includes('xxxxxxxx') &&
-      !String(process.env.SMTP_PASS).includes('YourHostinger')
-  )
+  const smtp = getSmtpConfig()
   res.json({
     ok: true,
     service: 'ezycertify',
-    smtp: smtpReady,
+    smtp: smtp.ready,
+    smtpMissing: smtp.missing,
+    smtpPlaceholderPassword: smtp.placeholder,
     courses: (db.tables.courses || []).length,
     users: (db.tables.users || []).length,
   })
