@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
-import { formatPrice } from '../data/siteData'
+import { formatCoursePrice } from '../data/siteData'
 import { loadRazorpay } from '../lib/razorpayClient'
 import { api } from '../lib/api'
 
@@ -24,7 +24,7 @@ function safeHtml(str) {
 
 export default function PaymentModal({ course, batch, onClose }) {
   const { currency, user } = useApp()
-  const displayPrice = formatPrice(course?.priceUSD, 'INR', '₹')
+  const displayPrice = formatCoursePrice(course, 'INR', '₹')
 
   const [formData, setFormData] = useState({
     name: user?.name || '',

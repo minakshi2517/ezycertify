@@ -39,7 +39,9 @@ export function normalizeCourse(raw) {
     duration: raw.duration || 'Live Virtual',
     rating: Number(raw.rating) || 4.8,
     students: Number(raw.students) || 0,
-    priceUSD: Number(raw.priceUSD ?? raw.price_usd) || 499,
+    priceUSD: raw.priceUSD != null || raw.price_usd != null ? Number(raw.priceUSD ?? raw.price_usd) : undefined,
+    priceINR: raw.priceINR != null || raw.price_inr != null ? Number(raw.priceINR ?? raw.price_inr) : undefined,
+    priceCurrency: raw.priceCurrency || raw.price_currency || undefined,
     upcoming: upcoming.length && typeof upcoming[0] === 'object' ? upcoming : [],
   }
 }

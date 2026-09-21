@@ -51,7 +51,7 @@ export async function createRazorpayOrder({ courseId, student, batch, userId = n
     throw new Error('Course not found in catalog.')
   }
 
-  const payable = getPayable(course.priceUSD)
+  const payable = getPayable(course)
   const receipt = `ezy_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`.slice(0, 40)
 
   // If live keys, call Razorpay API; if test/dev mock keys, generate structured order response
@@ -149,7 +149,7 @@ export function verifyAndEnrollPayment({ orderId, paymentId, signature, courseId
 export function finalizeEnrollment({ orderId, paymentId, signature, courseId, student, batch, userId = null, status = 'captured', rawPayload = null }) {
   const course = resolveCourse(courseId)
   const validCourseId = course?.id || 'pmp'
-  const payable = getPayable(course?.priceUSD || 499)
+  const payable = getPayable(course || 499)
   const now = new Date().toISOString()
 
   const cleanPaymentId = String(paymentId || `pay_${Date.now()}`)

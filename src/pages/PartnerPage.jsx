@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { partnerLogos } from '../data/siteData'
+import { partnerLogos, getCourseAmount } from '../data/siteData'
 import { CourseCard } from '../components/CoursesSection'
 import { useApp } from '../context/AppContext'
 import PaymentModal from '../components/PaymentModal'
@@ -67,9 +67,9 @@ export default function PartnerPage() {
     if (sortBy === 'rating') {
       result = [...result].sort((a, b) => b.rating - a.rating)
     } else if (sortBy === 'price-low') {
-      result = [...result].sort((a, b) => a.priceUSD - b.priceUSD)
+      result = [...result].sort((a, b) => getCourseAmount(a, 'INR') - getCourseAmount(b, 'INR'))
     } else if (sortBy === 'price-high') {
-      result = [...result].sort((a, b) => b.priceUSD - a.priceUSD)
+      result = [...result].sort((a, b) => getCourseAmount(b, 'INR') - getCourseAmount(a, 'INR'))
     }
 
     return result

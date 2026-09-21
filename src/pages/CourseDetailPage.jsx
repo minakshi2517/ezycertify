@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getCourseBySlug, formatPrice, WHATSAPP_LINK } from '../data/siteData'
+import { getCourseBySlug, formatCoursePrice, WHATSAPP_LINK } from '../data/siteData'
 import PaymentModal from '../components/PaymentModal'
 
 export default function CourseDetailPage() {
@@ -91,7 +91,7 @@ export default function CourseDetailPage() {
               Course Fee
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 900, color: 'var(--blue)', margin: '0.5rem 0' }}>
-              {formatPrice(course.priceUSD, currency, currencySymbol)}
+              {formatCoursePrice(course, currency, currencySymbol)}
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--gray-600)', marginBottom: '1.5rem' }}>Includes Exam Prep & Lifetime Support</p>
 

@@ -1146,7 +1146,8 @@ export const courses = [
     duration: '35 hours',
     rating: 4.8,
     students: 0,
-    priceUSD: 48000 / 83.5,
+    priceINR: 48000,
+    priceCurrency: 'INR',
     upcoming: []
   }
 ]
@@ -1217,14 +1218,47 @@ export const sampleCertificates = [
   },
 ]
 
+export function getCourseAmount(course, currencyCode = 'USD') {
+  if (!course) return 0
+  const inrRate = exchangeRates.INR || 83.5
+  const listedInr = course.priceINR != null && course.priceINR !== '' ? Number(course.priceINR) : null
+  const listedUsd = course.priceUSD != null && course.priceUSD !== '' ? Number(course.priceUSD) : null
+  const inrPriced = course.priceCurrency === 'INR' || (listedInr != null && (listedUsd == null || Number.isNaN(listedUsd)))
+
+  if (inrPriced && listedInr != null) {
+    if (currencyCode === 'INR') return Math.round(listedInr)
+    const usd = listedInr / inrRate
+    return Math.round(usd * (exchangeRates[currencyCode] || 1))
+  }
+
+  const usd = listedUsd || 0
+  if (currencyCode === 'USD') return Math.round(usd)
+  return Math.round(usd * (exchangeRates[currencyCode] || 1))
+}
+
 export function formatPrice(priceUSD, currencyCode = 'USD', symbol = '$') {
   const rate = exchangeRates[currencyCode] || 1
-  const converted = Math.round(priceUSD * rate)
+  const converted = Math.round(Number(priceUSD || 0) * rate)
 
   if (currencyCode === 'INR') {
     return `${symbol}${converted.toLocaleString('en-IN')}`
   }
   return `${symbol}${converted.toLocaleString('en-US')}`
+}
+
+export function formatCoursePrice(course, currencyCode = 'USD', symbol = '$') {
+  const inrPriced = course?.priceCurrency === 'INR' || (course?.priceINR != null && course?.priceUSD == null)
+  if (inrPriced) {
+    const amount = Math.round(Number(course.priceINR) || 0)
+    return `₹${amount.toLocaleString('en-IN')}`
+  }
+
+  const amount = getCourseAmount(course, currencyCode)
+  const displaySymbol = currencyCode === 'INR' ? '₹' : symbol
+  if (currencyCode === 'INR') {
+    return `${displaySymbol}${amount.toLocaleString('en-IN')}`
+  }
+  return `${displaySymbol}${amount.toLocaleString('en-US')}`
 }
 
 export function getCourseBySlug(slug) {
